@@ -14,7 +14,7 @@
 #define MAX_UNICORNE_TEXTURE_FILE_LENGTH 5
 
 #define UNICORN_COLLISION_BOX_HEIGHT 145
-#define UNICORN_COLLISION_BOX_WIDTH 260
+#define UNICORN_COLLISION_BOX_WIDTH 230
 #define UNICORN_COLLISION_BOX_X_OFFSET 60
 #define UNICORN_COLLISION_BOX_Y_OFFSET 20
 
@@ -86,7 +86,6 @@ public:
 
 private:
 	SDL_Texture* mTexture;
-
 	int mWidth;
 	int mHeight;
 };
@@ -136,16 +135,16 @@ public:
 		mCollider.y = mPosY + UNICORN_COLLISION_BOX_Y_OFFSET;
 	};
 
-	void move(bool horseLandedOnPlatform) {
+	void move(bool horseLandedOnPlatform, bool horseLandedOnObstacle) {
 		if (mIsJumping) {
 			Uint32 jumpTime = SDL_GetTicks() - mTimeWhenHorseJumped;
 			mPosY -= (10 - jumpTime/50);
-			if (horseLandedOnPlatform && jumpTime > 500) {
+			if ((horseLandedOnPlatform || horseLandedOnObstacle) && jumpTime > 500) {
 				mIsJumping = false;
 				jumpTime = 0;
 			}
 		}
-		else if(!horseLandedOnPlatform)
+		else if(!horseLandedOnPlatform && !horseLandedOnObstacle)
 			mPosY += 10;
 		shiftCollider();
 	};
@@ -176,6 +175,49 @@ private:
 	int mVelX, mVelY;
 	SDL_Rect mCollider;
 	Uint32 mTimeWhenHorseJumped;
+};
+
+class Obstacle {
+public:
+	Obstacle(SDL_Renderer* renderer) {
+		char obstacleTexturePath[MAX_PATH_LENGTH] = "../images/obstacle2.png";
+		if (!obstacleTexture.loadFromFile(obstacleTexturePath, renderer)) 
+			printf("Failed to load obstacle texture image!\n");
+		mPosX = SCREEN_WIDTH + 100;
+		mPosY = SCREEN_HEIGHT - 100 - obstacleTexture.getHeight();
+	}
+
+	~Obstacle() {
+		obstacleTexture.free();
+	}
+
+	void render(SDL_Renderer* renderer, int scrollingOffsetVel) {
+		mPosX += scrollingOffsetVel;
+		obstacleTexture.render(mPosX, SCREEN_HEIGHT - 100 - obstacleTexture.getHeight(), renderer, NULL);
+		if (mPosX < -obstacleTexture.getWidth())
+			mPosX = SCREEN_WIDTH + 100;
+	}
+
+	bool horseRanIntoObstacle(SDL_Rect* horseCollider) {
+		if ((horseCollider->x + horseCollider->w) >= mPosX &&
+			mPosX >= horseCollider->x &&
+			(horseCollider->y + horseCollider->h) > mPosY + 10) // zalicza granice bledu tego ze kon moze byc lekko nizej
+			return true;
+		return false;
+	}
+
+	bool checkIfHorseLandedOnObstacle(SDL_Rect* horseCollider) {
+		if ((horseCollider->x + horseCollider->w) >= mPosX &&
+			mPosX + obstacleTexture.getWidth() >= horseCollider->x &&
+			(horseCollider->y + horseCollider->h) <= mPosY + 10 && (horseCollider->y + horseCollider->h) >= mPosY -10) 
+			return true;
+
+		return false;
+	}
+
+private:
+	int mPosX, mPosY;
+	Texture obstacleTexture;
 };
 
 
@@ -273,7 +315,7 @@ int main()
 		printf("Failed to load media\n");
 	else {
 		Horse horseObject(0);
-		//Horse horseObject(SCREEN_HEIGHT - platformTexture.getHeight() - unicorneSprites[0].getHeight() + 30);
+		Obstacle obstacleObject(renderer);
 		SDL_Rect platformCollider = { 0, 0, 2 * platformTexture.getWidth(), platformTexture.getHeight() };
 
 		while (!quit) {
@@ -305,7 +347,7 @@ int main()
 
 			platformCollider.x = scrollingOffsetPlatform;
 			platformCollider.y = SCREEN_HEIGHT - 100;
-			horseObject.move(checkIfHorseLandedOnPlatform(horseObject.getCollider(), &platformCollider));
+			horseObject.move(checkIfHorseLandedOnPlatform(horseObject.getCollider(), &platformCollider), obstacleObject.checkIfHorseLandedOnObstacle(horseObject.getCollider()));
 
 			SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
 			SDL_RenderClear(renderer);
@@ -316,8 +358,13 @@ int main()
 			platformTexture.render(scrollingOffsetPlatform, SCREEN_HEIGHT - 100, renderer, NULL);
 			platformTexture.render(scrollingOffsetPlatform + platformTexture.getWidth(), SCREEN_HEIGHT - 100, renderer, NULL);
 
+			obstacleObject.render(renderer, scrollingOffsetVel);
+
 			int frameToDraw = (SDL_GetTicks() / 2) % UNICORNE_TEXTURES_NUM;
 			horseObject.renderHorse(renderer, &unicorneSprites[frameToDraw]);
+
+			if(obstacleObject.horseRanIntoObstacle(horseObject.getCollider())) 
+				printf("Kolizja");
 
 
 			SDL_RenderPresent(renderer);
