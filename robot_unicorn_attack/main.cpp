@@ -15,8 +15,8 @@
 #define MAX_UNICORNE_TEXTURE_FILE_LENGTH 5
 
 #define UNICORN_COLLISION_BOX_HEIGHT 145
-#define UNICORN_COLLISION_BOX_WIDTH 230
-#define UNICORN_COLLISION_BOX_X_OFFSET 60
+#define UNICORN_COLLISION_BOX_WIDTH 180
+#define UNICORN_COLLISION_BOX_X_OFFSET 100
 #define UNICORN_COLLISION_BOX_Y_OFFSET 20
 
 class Texture
@@ -66,15 +66,9 @@ public:
 		}
 	};
 
-	void render(int x, int y, SDL_Renderer* renderer, SDL_Rect* clip) {
+	void render(int x, int y, SDL_Renderer* renderer) {
 		SDL_Rect renderQuad = { x, y, mWidth, mHeight };
-
-		if (clip != NULL) {
-			renderQuad.w = clip->w;
-			renderQuad.h = clip->h;
-		}
-
-		SDL_RenderCopy(renderer, mTexture, clip, &renderQuad);
+		SDL_RenderCopy(renderer, mTexture, NULL, &renderQuad);
 	};
 
 	int getWidth() {
@@ -96,20 +90,18 @@ public:
 	static const int HORSE_VEL = 10;
 
 	Horse() {
-		mIsJumping = false;
 		mPosX = 0;
 		mPosY = 0;
-		mVelX = 0;
-		mVelY = 0;
-		horseGravity = 20;
+		mIsJumping = false;
+		mTimeWhenHorseJumped = 0;
+		mTimeWhenFreeFallStarted = 0;
 		mCollider.w = UNICORN_COLLISION_BOX_WIDTH;
 		mCollider.h = UNICORN_COLLISION_BOX_HEIGHT;
 		shiftCollider();
-		mTimeWhenHorseJumped = 0;
 	};
 
 	void renderHorse(SDL_Renderer* renderer, Texture* horseTextureToRender) {
-		(*horseTextureToRender).render(mPosX, mPosY, renderer, NULL);
+		(*horseTextureToRender).render(mPosX, mPosY, renderer);
 	}
 
 	void shiftCollider() {
@@ -117,17 +109,22 @@ public:
 		mCollider.y = mPosY + UNICORN_COLLISION_BOX_Y_OFFSET;
 	};
 
-	void move(bool horseLandedOnPlatform, bool horseLandedOnObstacle) {
+	void manipulateHorseOnYAxis(bool horseLandedOnPlatform, bool horseLandedOnObstacle) {
 		if (mIsJumping) {
 			Uint32 jumpTime = SDL_GetTicks() - mTimeWhenHorseJumped;
 			mPosY -= (10 - jumpTime/50);
-			if ((horseLandedOnPlatform || horseLandedOnObstacle) && jumpTime > 50) {
+			if ((horseLandedOnPlatform || horseLandedOnObstacle) && jumpTime > 50)
 				mIsJumping = false;
-				jumpTime = 0;
-			}
 		}
-		else if(!horseLandedOnPlatform && !horseLandedOnObstacle)
-			mPosY += 10;
+		else if (!horseLandedOnPlatform && !horseLandedOnObstacle) {
+			if (mTimeWhenFreeFallStarted == 0)
+				mTimeWhenFreeFallStarted = SDL_GetTicks();
+			Uint32 freeFallTime = SDL_GetTicks() - mTimeWhenFreeFallStarted;
+			mPosY += freeFallTime/50;
+		}
+		else
+			mTimeWhenFreeFallStarted = 0;
+
 		shiftCollider();
 	};
 
@@ -138,25 +135,15 @@ public:
 		}
 	}
 
-	int getPosX() {
-		return mPosX;
-	};
-
-	int getPosY() {
-		return mPosY;
-	};
-
 	SDL_Rect* getCollider() {
 		return &mCollider;
 	};
 
 private:
 	bool mIsJumping;
-	int horseGravity;
 	int mPosX, mPosY;
-	int mVelX, mVelY;
 	SDL_Rect mCollider;
-	Uint32 mTimeWhenHorseJumped;
+	Uint32 mTimeWhenHorseJumped, mTimeWhenFreeFallStarted;
 };
 
 class Obstacle {
@@ -183,7 +170,7 @@ public:
 
 	void render(SDL_Renderer* renderer, int scrollingOffsetVel) {
 		mPosX += scrollingOffsetVel;
-		obstacleTexture.render(mPosX, mPosY, renderer, NULL);
+		obstacleTexture.render(mPosX, mPosY, renderer);
 		if (mPosX < -obstacleTexture.getWidth())
 			mPosX = SCREEN_WIDTH + 100;
 	}
@@ -234,8 +221,8 @@ public:
 
 	void render(SDL_Renderer* renderer, int scrollingOffsetVel) {
 		mPosX += scrollingOffsetVel;
-		mPlatformTexture.render(mPosX, mPosY, renderer, NULL);
-		mPlatformTexture.render(mPosX + mPlatformTexture.getWidth(), mPosY, renderer, NULL);
+		mPlatformTexture.render(mPosX, mPosY, renderer);
+		mPlatformTexture.render(mPosX + mPlatformTexture.getWidth(), mPosY, renderer);
 		if (mPosX < -mPlatformTexture.getWidth())
 			mPosX = 0;
 	}
@@ -363,14 +350,17 @@ int main()
 				}
 			}
 
-			horseObject.move(platformObject.checkIfHorseLandedOnPlatform(horseObject.getCollider()), obstacleObject.checkIfHorseLandedOnObstacle(horseObject.getCollider()));
+			horseObject.manipulateHorseOnYAxis(platformObject.checkIfHorseLandedOnPlatform(horseObject.getCollider()), obstacleObject.checkIfHorseLandedOnObstacle(horseObject.getCollider()));
 
 			SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
 			SDL_RenderClear(renderer);
 
-			bgTexture.render(0, 0, renderer, NULL);
+			bgTexture.render(0, 0, renderer);
 			platformObject.render(renderer, scrollingOffsetVel);
 			obstacleObject.render(renderer, scrollingOffsetVel);
+
+			SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+			SDL_RenderFillRect(renderer, horseObject.getCollider());
 
 			int frameToDraw = (SDL_GetTicks() / 2) % UNICORNE_TEXTURES_NUM;
 			horseObject.renderHorse(renderer, &unicorneSprites[frameToDraw]);
