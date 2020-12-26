@@ -96,6 +96,7 @@ public:
 	static const int HORSE_VEL = 10;
 
 	Horse(int posY) {
+		mIsJumping = false;
 		mPosX = 0;
 		mPosY = posY;
 		mVelX = 0;
@@ -104,8 +105,7 @@ public:
 		mCollider.w = UNICORN_COLLISION_BOX_WIDTH;
 		mCollider.h = UNICORN_COLLISION_BOX_HEIGHT;
 		shiftCollider();
-		timeHorseIsAcceleratingHeight = 0;
-		timeHorseIsFalling = 0;
+		mTimeWhenHorseJumped = 0;
 	};
 
 	void renderHorse(SDL_Renderer* renderer, Texture* horseTextureToRender) {
@@ -115,7 +115,7 @@ public:
 	void handleEvent(SDL_Event& e) {
 		if (e.type == SDL_KEYDOWN && e.key.repeat == 0) {
 			switch (e.key.keysym.sym) {
-				//case SDLK_UP: isJumping = true; break;
+				//case SDLK_UP: mIsJumping = true; break;
 				//case SDLK_DOWN: mVelY += HORSE_VEL; break;
 			case SDLK_LEFT: mVelX -= HORSE_VEL; break;
 			case SDLK_RIGHT: mVelX += HORSE_VEL; break;
@@ -136,23 +136,26 @@ public:
 		mCollider.y = mPosY + UNICORN_COLLISION_BOX_Y_OFFSET;
 	};
 
-	void move(bool horseLandedOnPlatform, bool horseIsJumping) {
-		if (!horseLandedOnPlatform && !horseIsJumping) {
-			if (timeHorseIsFalling == 0) {
-				timeHorseIsFalling = SDL_GetTicks();
-				timeHorseIsAcceleratingHeight = 0;
+	void move(bool horseLandedOnPlatform) {
+		if (mIsJumping) {
+			Uint32 jumpTime = SDL_GetTicks() - mTimeWhenHorseJumped;
+			mPosY -= (10 - jumpTime/50);
+			if (horseLandedOnPlatform && jumpTime > 500) {
+				mIsJumping = false;
+				jumpTime = 0;
 			}
-			mPosY += (SDL_GetTicks() - timeHorseIsFalling) / 100;
 		}
-		else if (horseIsJumping) {
-			if (timeHorseIsAcceleratingHeight == 0) {
-				timeHorseIsAcceleratingHeight = SDL_GetTicks();
-				timeHorseIsFalling = 0;
-			}
-			mPosY -= (SDL_GetTicks() - timeHorseIsAcceleratingHeight) / 20;
-		}
+		else if(!horseLandedOnPlatform)
+			mPosY += 10;
 		shiftCollider();
 	};
+
+	void jump() {
+		if (!mIsJumping) {
+			mIsJumping = true;
+			mTimeWhenHorseJumped = SDL_GetTicks();
+		}
+	}
 
 	int getPosX() {
 		return mPosX;
@@ -167,11 +170,12 @@ public:
 	};
 
 private:
-	Uint32 timeHorseIsFalling, timeHorseIsAcceleratingHeight;
+	bool mIsJumping;
 	int horseGravity;
 	int mPosX, mPosY;
 	int mVelX, mVelY;
 	SDL_Rect mCollider;
+	Uint32 mTimeWhenHorseJumped;
 };
 
 
@@ -259,11 +263,9 @@ int main()
 	Texture unicorneSprites[UNICORNE_TEXTURES_NUM], bgTexture, platformTexture;
 	bool quit = false;
 
-	bool isHorseJumping = false;
 	int scrollingOffset = 0;
 	int scrollingOffsetPlatform = 0;
 	int scrollingOffsetVel = 0;
-	Uint32 timeHorseStartedJumping = 0;
 
 	if (!init(&window, &renderer))
 		printf("Failed to initialize\n");
@@ -281,7 +283,7 @@ int main()
 				else if (e.type == SDL_KEYDOWN && e.key.repeat == 0) {
 					switch (e.key.keysym.sym) {
 					case SDLK_RIGHT: scrollingOffsetVel -= 10; break;
-					case SDLK_UP: isHorseJumping = true; break;
+					case SDLK_UP: horseObject.jump(); break;
 					}
 				}
 				else if (e.type == SDL_KEYUP && e.key.repeat == 0) {
@@ -290,15 +292,6 @@ int main()
 					}
 				}
 				//horseObject.handleEvent(e);
-			}
-
-			if (isHorseJumping && timeHorseStartedJumping == 0) {
-				timeHorseStartedJumping = SDL_GetTicks();
-			}
-
-			if (SDL_GetTicks() - timeHorseStartedJumping > 300 && isHorseJumping) {
-				timeHorseStartedJumping = 0;
-				isHorseJumping = false;
 			}
 
 
@@ -312,18 +305,7 @@ int main()
 
 			platformCollider.x = scrollingOffsetPlatform;
 			platformCollider.y = SCREEN_HEIGHT - 100;
-			horseObject.move(checkIfHorseLandedOnPlatform(horseObject.getCollider(), &platformCollider), isHorseJumping);
-			//camera.x = (horseObject.getPosX() + unicorneSprites[0].getWidth() / 2) - SCREEN_WIDTH / 2;
-			//camera.y = (horseObject.getPosY() + unicorneSprites[0].getHeight() / 2) - SCREEN_HEIGHT / 2;
-
-			/*if (camera.x < 0)
-				camera.x = 0;
-			if (camera.y < 0)
-				camera.y = 0;
-			if (camera.x > LVL_WIDTH - camera.w)
-				camera.x = LVL_WIDTH - camera.w;
-			if (camera.y > LVL_HEIGHT - camera.h)
-				camera.y = LVL_HEIGHT - camera.h;*/
+			horseObject.move(checkIfHorseLandedOnPlatform(horseObject.getCollider(), &platformCollider));
 
 			SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
 			SDL_RenderClear(renderer);
@@ -333,8 +315,6 @@ int main()
 
 			platformTexture.render(scrollingOffsetPlatform, SCREEN_HEIGHT - 100, renderer, NULL);
 			platformTexture.render(scrollingOffsetPlatform + platformTexture.getWidth(), SCREEN_HEIGHT - 100, renderer, NULL);
-			/*platformTexture.render(scrollingOffsetPlatform, SCREEN_HEIGHT - platformTexture.getHeight(), renderer, NULL);
-			platformTexture.render(scrollingOffsetPlatform + platformTexture.getWidth(), SCREEN_HEIGHT - platformTexture.getHeight(), renderer, NULL);*/
 
 			int frameToDraw = (SDL_GetTicks() / 2) % UNICORNE_TEXTURES_NUM;
 			horseObject.renderHorse(renderer, &unicorneSprites[frameToDraw]);
