@@ -100,14 +100,32 @@ public:
 		shiftCollider();
 	};
 
-	void renderHorse(SDL_Renderer* renderer, Texture* horseTextureToRender) {
-		(*horseTextureToRender).render(mPosX, mPosY, renderer);
+	void render(SDL_Renderer* renderer) {
+		int frameToDraw = (SDL_GetTicks() / 2) % UNICORNE_TEXTURES_NUM;
+		mUnicornRunningTextures[frameToDraw].render(mPosX, mPosY, renderer);
 	}
 
 	void shiftCollider() {
 		mCollider.x = mPosX + UNICORN_COLLISION_BOX_X_OFFSET;
 		mCollider.y = mPosY + UNICORN_COLLISION_BOX_Y_OFFSET;
 	};
+
+	bool loadTextures(SDL_Renderer* renderer) {
+		for (int i = 1; i <= UNICORNE_TEXTURES_NUM; i++) {
+			char path[MAX_PATH_LENGTH] = "../images/unicorn_images/";
+			char a[MAX_UNICORNE_TEXTURE_FILE_LENGTH];
+			_itoa(i, a, 10);
+			strncat(path, a, strlen(a));
+			strncat(path, ".png", 4);
+
+			if (!mUnicornRunningTextures[i - 1].loadFromFile(path, renderer)) {
+				printf("Failed to load Foo' texture image!\n");
+				return false;
+			}
+		}
+
+		return true;
+	}
 
 	void manipulateHorseOnYAxis(bool horseLandedOnPlatform, bool horseLandedOnObstacle) {
 		if (mIsJumping) {
@@ -144,6 +162,7 @@ private:
 	int mPosX, mPosY;
 	SDL_Rect mCollider;
 	Uint32 mTimeWhenHorseJumped, mTimeWhenFreeFallStarted;
+	Texture mUnicornRunningTextures[UNICORNE_TEXTURES_NUM];
 };
 
 class Obstacle {
@@ -243,22 +262,8 @@ private:
 };
 
 
-bool loadMedia(Texture unicorneSprites[UNICORNE_TEXTURES_NUM], Texture* bgTexture, Obstacle* obstacleObject, Platform* platformObject, SDL_Renderer* renderer) {
+bool loadMedia(Texture* bgTexture, Horse* horseObject, Obstacle* obstacleObject, Platform* platformObject, SDL_Renderer* renderer) {
 	bool success = true;
-
-	for (int i = 1; i <= UNICORNE_TEXTURES_NUM; i++) {
-		char path[MAX_PATH_LENGTH] = "../images/unicorn_images/";
-		char a[MAX_UNICORNE_TEXTURE_FILE_LENGTH];
-		_itoa(i, a, 10);
-		strncat(path, a, strlen(a));
-		strncat(path, ".png", 4);
-
-		if (!unicorneSprites[i - 1].loadFromFile(path, renderer)) {
-			printf("Failed to load Foo' texture image!\n");
-			success = false;
-			break;
-		}
-	}
 
 	char bgTexturePath[MAX_PATH_LENGTH] = "../images/background.png";
 	if (!(*bgTexture).loadFromFile(bgTexturePath, renderer)) {
@@ -266,7 +271,7 @@ bool loadMedia(Texture unicorneSprites[UNICORNE_TEXTURES_NUM], Texture* bgTextur
 		success = false;
 	};
 
-	if (!obstacleObject->loadTexture(renderer) || !platformObject->loadTexture(renderer))
+	if (!obstacleObject->loadTexture(renderer) || !platformObject->loadTexture(renderer) || !horseObject->loadTextures(renderer))
 		success = false;
 
 	return success;
@@ -330,7 +335,7 @@ int main()
 
 	if (!init(&window, &renderer))
 		printf("Failed to initialize\n");
-	else if (!loadMedia(unicorneSprites, &bgTexture, &obstacleObject, &platformObject, renderer))
+	else if (!loadMedia(&bgTexture, &horseObject, &obstacleObject, &platformObject, renderer))
 		printf("Failed to load media\n");
 	else {
 		while (!quit) {
@@ -358,12 +363,7 @@ int main()
 			bgTexture.render(0, 0, renderer);
 			platformObject.render(renderer, scrollingOffsetVel);
 			obstacleObject.render(renderer, scrollingOffsetVel);
-
-			SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
-			SDL_RenderFillRect(renderer, horseObject.getCollider());
-
-			int frameToDraw = (SDL_GetTicks() / 2) % UNICORNE_TEXTURES_NUM;
-			horseObject.renderHorse(renderer, &unicorneSprites[frameToDraw]);
+			horseObject.render(renderer);
 
 			if(obstacleObject.horseRanIntoObstacle(horseObject.getCollider())) 
 				printf("Kolizja");
