@@ -7,6 +7,8 @@
 #include <time.h>
 
 #define UNICORN_TEXTURES_NUM 450
+#define UNICORN_WIDTH 200
+#define UNICORN_HEIGHT 106
 
 #define SCREEN_WIDTH 640
 #define SCREEN_HEIGHT 480
@@ -17,10 +19,6 @@
 #define MAX_PATH_LENGTH 250
 #define MAX_UNICORNE_TEXTURE_FILE_LENGTH 5
 
-#define UNICORN_COLLISION_BOX_HEIGHT 145
-#define UNICORN_COLLISION_BOX_WIDTH 180
-#define UNICORN_COLLISION_BOX_X_OFFSET 100
-#define UNICORN_COLLISION_BOX_Y_OFFSET 20
 
 class Texture
 {
@@ -73,6 +71,11 @@ public:
 		SDL_RenderCopy(renderer, mTexture, NULL, &renderQuad);
 	};
 
+	void resizeAndRender(int x, int y, int width, int height, SDL_Renderer* renderer) {
+		SDL_Rect renderQuad = { x, y, width, height };
+		SDL_RenderCopy(renderer, mTexture, NULL, &renderQuad);
+	}
+
 	int getWidth() {
 		return mWidth;
 	};
@@ -95,8 +98,8 @@ public:
 		mIsJumping = false;
 		mTimeWhenHorseJumped = 0;
 		mTimeWhenFreeFallStarted = 0;
-		mCollider.w = UNICORN_COLLISION_BOX_WIDTH;
-		mCollider.h = UNICORN_COLLISION_BOX_HEIGHT;
+		mCollider.w = UNICORN_WIDTH / 2;
+		mCollider.h = UNICORN_HEIGHT * 3 / 4;
 		shiftCollider();
 	};
 
@@ -107,12 +110,12 @@ public:
 
 	void render(SDL_Renderer* renderer) {
 		int frameToDraw = SDL_GetTicks() % UNICORN_TEXTURES_NUM;
-		mUnicornRunningTextures[frameToDraw].render(mPosX, mPosY, renderer);
+		mUnicornRunningTextures[frameToDraw].resizeAndRender(mPosX, mPosY, UNICORN_WIDTH, UNICORN_HEIGHT, renderer);
 	}
 
 	void shiftCollider() {
-		mCollider.x = mPosX + UNICORN_COLLISION_BOX_X_OFFSET;
-		mCollider.y = mPosY + UNICORN_COLLISION_BOX_Y_OFFSET;
+		mCollider.x = mPosX + UNICORN_WIDTH / 3;
+		mCollider.y = mPosY + UNICORN_HEIGHT / 5;
 	};
 
 	bool loadTextures(SDL_Renderer* renderer) {
@@ -135,9 +138,11 @@ public:
 	void manipulateHorseOnYAxis(bool horseLandedOnPlatform, bool horseLandedOnObstacle) {
 		if (mIsJumping) {
 			Uint32 jumpTime = SDL_GetTicks() - mTimeWhenHorseJumped;
-			mPosY -= (10 - jumpTime/50);
+
 			if ((horseLandedOnPlatform || horseLandedOnObstacle) && jumpTime > 50)
 				mIsJumping = false;
+			else
+				mPosY -= (10 - jumpTime/50);
 		}
 		else if (!horseLandedOnPlatform && !horseLandedOnObstacle) {
 			if (mTimeWhenFreeFallStarted == 0)

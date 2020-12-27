@@ -1,3 +1,3 @@
 ﻿  main.cpp
-C:\Users\barte\source\repos\robot_unicorn_attack\robot_unicorn_attack\main.cpp(176,13): warning C4244: "argument": konwersja z "time_t" do "unsigned int", możliwa utrata danych
+C:\Users\barte\source\repos\robot_unicorn_attack\robot_unicorn_attack\main.cpp(181,13): warning C4244: "argument": konwersja z "time_t" do "unsigned int", możliwa utrata danych
   robot_unicorn_attack.vcxproj -> C:\Users\barte\source\repos\robot_unicorn_attack\Debug\robot_unicorn_attack.exe
