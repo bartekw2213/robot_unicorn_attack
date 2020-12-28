@@ -17,12 +17,17 @@
 #define UNICORN_DASH_TIME 500							// czas trwania zrywu jednorozca
 #define UNICORN_TIME_BETWEEN_DASHES 2000				// czas jaki musi minac by gracz ponownie mogl wykonac zryw
 #define UNICORN_ACCELERATION_TEMPO 5					// im większa stała tym wolniej gra będzie przyśpieszać
+#define UNICORN_NORMAL_JUMP_POWER 15					// moc normalnego skoku jednorozca
+#define UNICORN_EXTENDED_JUMP_POWER 500					// moc wydluzonego skoku jednorozca
+#define UNICORN_MAX_LONG_JUMP_TIME 500					// maksymalny czas trwania dlugiego skoku jednorozca
 
-#define SCREEN_WIDTH 640
-#define SCREEN_HEIGHT 480
+#define SCREEN_WIDTH 640								// szerokosc ekranu gry
+#define SCREEN_HEIGHT 480								// wysokosc ekranu gry
+#define GRAVITATION_FACTOR 25							// wspolczynnik grawitacji - im bedzie mniejszy tym grawitacja bedzie silniejsza
+#define JUMP_TIME_OFFSET 50								// czas po ktorym jest nasluchiwane czy jednorozec dotknal ziemi po wyskoczeniu
 
-#define PLATFORM_Y SCREEN_HEIGHT - 100
-#define OBSTACLE_COLLISION_Y_OFFSET 10
+#define PLATFORM_Y SCREEN_HEIGHT - 100					// wysokosc na jakiej ustawiana jest platforma
+#define OBSTACLE_COLLISION_Y_OFFSET 10					// granica bledu w jakiej przeszkoda jest czula na kolizje z jednorozcem
 
 #define MAX_PATH_LENGTH 250								// maksymalna dlugosc sciezki pliku
 #define MAX_UNICORNE_TEXTURE_FILE_LENGTH 5				// maksymalna dlugosc nazwy pliku z tekstura konia
@@ -103,12 +108,12 @@ public:
 	Horse() {
 		mPosX = 0;
 		mPosY = 0;
-		mTimesHorseJumped = 0;
+		mHowManyTimesHorseJumped = 0;
 		mTimeWhenHorseJumped = 0;
 		mTimeWhenFreeFallStarted = 0;
 		mTimeWhenHorseDashed = 0;
-		mIsPlayerHoldingJumpKey = false;
 		mIsHorseDashing = false;
+		mIsPlayerHoldingJumpKey = false;
 		mIsHorseFreeFallingAfterDash = false;
 		mCollider.w = UNICORN_WIDTH / 2;
 		mCollider.h = UNICORN_HEIGHT * 3 / 4;
@@ -140,63 +145,47 @@ public:
 	};
 
 	bool loadTextures(SDL_Renderer* renderer) {
-		for (int i = 1; i <= UNICORN_TEXTURES_NUM; i++) {
-			char path[MAX_PATH_LENGTH] = "../images/unicorn_run/";
-			char a[MAX_UNICORNE_TEXTURE_FILE_LENGTH];
-			_itoa(i, a, 10);
-			strncat(path, a, strlen(a));
-			strncat(path, ".png", strlen(".png"));
+		if(!mLoadHorseAnimationFrames(UNICORN_TEXTURES_NUM, "../images/unicorn_run/", mUnicornRunningTextures, renderer))
+			return false;
 
-			if (!mUnicornRunningTextures[i - 1].loadFromFile(path, renderer)) {
-				printf("Failed to load unicorn running texture image!\n");
-				return false;
-			}
-		}
-
-		for (int i = 1; i <= UNICORN_DASHING_TEXTURES_NUM; i++) {
-			char path[MAX_PATH_LENGTH] = "../images/unicorn_dash/";
-			char a[MAX_UNICORNE_TEXTURE_FILE_LENGTH];
-			_itoa(i, a, 10);
-			strncat(path, a, strlen(a));
-			strncat(path, ".png", strlen(".png"));
-
-			if (!mUnicornDashingTextures[i - 1].loadFromFile(path, renderer)) {
-				printf("Failed to load unicorn dashing texture image!\n");
-				return false;
-			}
-		}
+		if (!mLoadHorseAnimationFrames(UNICORN_DASHING_TEXTURES_NUM, "../images/unicorn_dash/", mUnicornDashingTextures, renderer))
+			return false;
 
 		return true;
 	}
 
 	void manipulateHorseOnYAxis(bool horseLandedOnPlatform, bool horseLandedOnObstacle) {
+		// jednorozec pozostaje nieruchomy na osi Y podczas gdy wykonuje zryw
 		if (mIsHorseDashing) {
 			mPosY -= 0;
 
+			// wylacza zryw jednorozca po okreslonym czasie
 			if (SDL_GetTicks() - mTimeWhenHorseDashed > UNICORN_DASH_TIME) {
 				mIsHorseDashing = false;
 				mIsHorseFreeFallingAfterDash = true;
 				mTimeWhenFreeFallStarted = SDL_GetTicks();
 			}
 		}
-		else if (mTimesHorseJumped != 0 && !mIsHorseFreeFallingAfterDash) {
+		// obsluga skoku jednorozca
+		else if (mHowManyTimesHorseJumped != 0 && !mIsHorseFreeFallingAfterDash) {
 			Uint32 jumpTime = SDL_GetTicks() - mTimeWhenHorseJumped;
 
-			if ((horseLandedOnPlatform || horseLandedOnObstacle) && jumpTime > 50)
-				mTimesHorseJumped = 0;
-			else if (mIsPlayerHoldingJumpKey && jumpTime <= 500 && jumpTime > 50)
-				mPosY -= (500 - jumpTime) / 25;
-			else if ((15 - jumpTime / 25) > 0)
-				mPosY -= (15 - jumpTime / 25);
+			if ((horseLandedOnPlatform || horseLandedOnObstacle) && jumpTime > JUMP_TIME_OFFSET)
+				mHowManyTimesHorseJumped = 0;
+			else if (mIsPlayerHoldingJumpKey && jumpTime <= UNICORN_MAX_LONG_JUMP_TIME && jumpTime > JUMP_TIME_OFFSET)
+				mPosY -= (UNICORN_EXTENDED_JUMP_POWER - jumpTime) / GRAVITATION_FACTOR;
+			else if ((UNICORN_NORMAL_JUMP_POWER - jumpTime / GRAVITATION_FACTOR) > 0)
+				mPosY -= (UNICORN_NORMAL_JUMP_POWER - jumpTime / GRAVITATION_FACTOR);
 			else 
 				mTimeWhenFreeFallStarted = SDL_GetTicks();
 		}
+		// obsluga swobodnego spadania jednorozca - np. gdy spada z platformy lub przeszkody
 		else if (!horseLandedOnPlatform && !horseLandedOnObstacle) {
 			if (mTimeWhenFreeFallStarted == 0) 
 				mTimeWhenFreeFallStarted = SDL_GetTicks();
 
 			Uint32 freeFallTime = SDL_GetTicks() - mTimeWhenFreeFallStarted;
-			mPosY += freeFallTime/25;
+			mPosY += freeFallTime/GRAVITATION_FACTOR;
 		}
 		else {
 			mTimeWhenFreeFallStarted = 0;
@@ -208,29 +197,27 @@ public:
 
 	void jump(bool isPlayerHoldingJumpKey) {
 		mIsPlayerHoldingJumpKey = isPlayerHoldingJumpKey;
-		if (mTimesHorseJumped < 2 && isPlayerHoldingJumpKey && !mIsHorseDashing) {
-			++mTimesHorseJumped;
+		if (mHowManyTimesHorseJumped < 2 && isPlayerHoldingJumpKey && !mIsHorseDashing) {
+			++mHowManyTimesHorseJumped;
 			mTimeWhenHorseJumped = SDL_GetTicks();
 			mIsHorseFreeFallingAfterDash = false;
 		}
 	}
 
 	void dash(bool isPlayerHoldingDash) {
-		// gdy gracz przestanie trzymacz przycisk X
+		// gdy gracz przestanie trzymacz przycisk X przestan wykonywac zryw
 		if (!isPlayerHoldingDash) {		
 			mIsHorseDashing = false;
 			return;
 		}
 
-		// pozwol na wykonanie dash jesli poprzedni byl wystarczajaco czasu temu
+		// pozwol na wykonanie zrywu jesli poprzedni byl wystarczajaco czasu temu
 		if (SDL_GetTicks() - mTimeWhenHorseDashed > UNICORN_TIME_BETWEEN_DASHES && isPlayerHoldingDash) { 
 			mIsHorseDashing = true;
 			mTimeWhenHorseDashed = SDL_GetTicks();
-			if (mTimesHorseJumped == 2)
-				--mTimesHorseJumped;
+			if (mHowManyTimesHorseJumped == 2)
+				--mHowManyTimesHorseJumped;
 		}
-
-
 	}
 
 	bool getIsHorseDashing() {
@@ -243,11 +230,32 @@ public:
 
 private:
 	bool mIsPlayerHoldingJumpKey, mIsHorseDashing, mIsHorseFreeFallingAfterDash;
-	int mTimesHorseJumped;
+	int mHowManyTimesHorseJumped;
 	int mPosX, mPosY;
 	SDL_Rect mCollider;
 	Uint32 mTimeWhenHorseJumped, mTimeWhenFreeFallStarted, mTimeWhenHorseDashed;
 	Texture mUnicornRunningTextures[UNICORN_TEXTURES_NUM], mUnicornDashingTextures[UNICORN_DASHING_TEXTURES_NUM];
+
+	bool mLoadHorseAnimationFrames(int numOfFrames, char const* pathToFolderWithFrames, Texture* arrayOfFrames, SDL_Renderer* renderer) {
+
+		for (int i = 1; i <= numOfFrames; i++) {
+			char path[MAX_PATH_LENGTH] = "";
+			strncat(path, pathToFolderWithFrames, strlen(pathToFolderWithFrames));
+
+			// dodanie do sciezki nazwe wczytywanego pliku (nazwa zdjec danej animacji jednorozca to liczby 1.png, 2.png, 3.png, ...)
+			char a[MAX_UNICORNE_TEXTURE_FILE_LENGTH];
+			_itoa(i, a, 10);
+			strncat(path, a, strlen(a));
+			strncat(path, ".png", strlen(".png"));
+
+			if (!arrayOfFrames[i - 1].loadFromFile(path, renderer)) {
+				printf("Failed to load unicorn animation images!\n");
+				return false;
+			}
+		}
+
+		return true;
+	}
 };
 
 class Obstacle {
