@@ -9,6 +9,9 @@
 #define UNICORN_TEXTURES_NUM 450
 #define UNICORN_WIDTH 200
 #define UNICORN_HEIGHT 106
+#define UNICORN_START_SPEED 10
+#define UNICORN_MAX_SPEED 20
+#define UNICORN_ACCELERATION_TEMPO 5	// im większa stała tym wolniej gra będzie przyśpieszać
 
 #define SCREEN_WIDTH 640
 #define SCREEN_HEIGHT 480
@@ -95,9 +98,10 @@ public:
 	Horse() {
 		mPosX = 0;
 		mPosY = 0;
-		mIsJumping = false;
+		mTimesHorseJumped = 0;
 		mTimeWhenHorseJumped = 0;
 		mTimeWhenFreeFallStarted = 0;
+		mIsPlayerHoldingJumpKey = false;
 		mCollider.w = UNICORN_WIDTH / 2;
 		mCollider.h = UNICORN_HEIGHT * 3 / 4;
 		shiftCollider();
@@ -136,19 +140,23 @@ public:
 	}
 
 	void manipulateHorseOnYAxis(bool horseLandedOnPlatform, bool horseLandedOnObstacle) {
-		if (mIsJumping) {
+		if (mTimesHorseJumped != 0) {
 			Uint32 jumpTime = SDL_GetTicks() - mTimeWhenHorseJumped;
 
 			if ((horseLandedOnPlatform || horseLandedOnObstacle) && jumpTime > 50)
-				mIsJumping = false;
+				mTimesHorseJumped = 0;
+			else if (mIsPlayerHoldingJumpKey && jumpTime <= 500 && jumpTime > 50)
+				mPosY -= (500 - jumpTime) / 25;
+			else if ((15 - jumpTime / 25) > 0)
+				mPosY -= (15 - jumpTime / 25);
 			else
-				mPosY -= (10 - jumpTime/50);
+				mTimeWhenFreeFallStarted = SDL_GetTicks();
 		}
 		else if (!horseLandedOnPlatform && !horseLandedOnObstacle) {
 			if (mTimeWhenFreeFallStarted == 0)
 				mTimeWhenFreeFallStarted = SDL_GetTicks();
 			Uint32 freeFallTime = SDL_GetTicks() - mTimeWhenFreeFallStarted;
-			mPosY += freeFallTime/50;
+			mPosY += freeFallTime/25;
 		}
 		else
 			mTimeWhenFreeFallStarted = 0;
@@ -156,9 +164,10 @@ public:
 		shiftCollider();
 	};
 
-	void jump() {
-		if (!mIsJumping) {
-			mIsJumping = true;
+	void jump(bool isPlayerHoldingJumpKey) {
+		mIsPlayerHoldingJumpKey = isPlayerHoldingJumpKey;
+		if (mTimesHorseJumped < 2 && isPlayerHoldingJumpKey) {
+			++mTimesHorseJumped;
 			mTimeWhenHorseJumped = SDL_GetTicks();
 		}
 	}
@@ -168,7 +177,8 @@ public:
 	};
 
 private:
-	bool mIsJumping;
+	bool mIsPlayerHoldingJumpKey;
+	int mTimesHorseJumped;
 	int mPosX, mPosY;
 	SDL_Rect mCollider;
 	Uint32 mTimeWhenHorseJumped, mTimeWhenFreeFallStarted;
@@ -322,15 +332,47 @@ bool init(SDL_Window** window, SDL_Renderer** renderer) {
 	return success;
 }
 
-bool checkIfHorseLandedOnPlatform(SDL_Rect* horseColliser, SDL_Rect* platformColliser) {
-	int bottomHorseCollisier, topPlatformCollisier;
-	bottomHorseCollisier = (*horseColliser).y + (*horseColliser).h;
-	topPlatformCollisier = (*platformColliser).y;
+void projectDefaultControls(SDL_Event* e, Horse* horseObject, bool* quit, int* scrollingOffsetVel) {
+	if ((*e).type == SDL_QUIT)
+		*quit = true;
+	else if ((*e).type == SDL_KEYDOWN && (*e).key.repeat == 0) {
+		switch ((*e).key.keysym.sym) {
+		case SDLK_RIGHT: *scrollingOffsetVel -= UNICORN_START_SPEED; break;
+		case SDLK_UP: (*horseObject).jump(true); break;
+		case SDLK_ESCAPE: *quit = true; break;
+		}
+	}
+	else if ((*e).type == SDL_KEYUP && (*e).key.repeat == 0) {
+		switch ((*e).key.keysym.sym) {
+		case SDLK_UP: (*horseObject).jump(false); break;
+		case SDLK_RIGHT: *scrollingOffsetVel += UNICORN_START_SPEED; break;
+		}
+	}
+}
 
-	if (bottomHorseCollisier >= topPlatformCollisier)
-		return true;
+void gameDefaultControls(SDL_Event* e, Horse* horseObject, bool* quit, int* scrollingOffsetVel) {
+	if ((*e).type == SDL_QUIT)
+		*quit = true;
+	else if ((*e).type == SDL_KEYDOWN && (*e).key.repeat == 0) {
+		switch ((*e).key.keysym.sym) {
+		case SDLK_z: 
+			(*horseObject).jump(true); 
+			break;
+		case SDLK_ESCAPE: *quit = true; break;
+		}
+	}
+	else if ((*e).type == SDL_KEYUP && (*e).key.repeat == 0) {
+		switch ((*e).key.keysym.sym) {
+		case SDLK_z: 
+			(*horseObject).jump(false); 
+			break;
+		}
+	}
+}
 
-	return false;
+void controlGameSpeedBasedOnTime(Uint32 currentTime, int* scrollingOffsetVel) {
+	if (*scrollingOffsetVel > -UNICORN_MAX_SPEED)
+		*scrollingOffsetVel = -((int)currentTime / 1000) / UNICORN_ACCELERATION_TEMPO - UNICORN_START_SPEED;
 }
 
 void close(SDL_Window* window, SDL_Renderer* renderer) {
@@ -351,6 +393,7 @@ int main()
 	Obstacle obstacleObject;
 	Platform platformObject;
 	bool quit = false;
+	bool gameDefaultControlsEnabled = true;
 	int scrollingOffsetVel = 0;
 
 	if (!init(&window, &renderer))
@@ -358,22 +401,20 @@ int main()
 	else if (!loadMedia(&bgTexture, &horseObject, &obstacleObject, &platformObject, renderer))
 		printf("Failed to load media\n");
 	else {
+		Uint32 gameStartTime = SDL_GetTicks();
+
 		while (!quit) {
+			Uint32 currentTime = SDL_GetTicks() - gameStartTime;
+
 			while (SDL_PollEvent(&e) != 0) {
-				if (e.type == SDL_QUIT)
-					quit = true;
-				else if (e.type == SDL_KEYDOWN && e.key.repeat == 0) {
-					switch (e.key.keysym.sym) {
-					case SDLK_RIGHT: scrollingOffsetVel -= 15; break;
-					case SDLK_UP: horseObject.jump(); break;
-					}
-				}
-				else if (e.type == SDL_KEYUP && e.key.repeat == 0) {
-					switch (e.key.keysym.sym) {
-					case SDLK_RIGHT: scrollingOffsetVel += 15; break;
-					}
-				}
+				if(gameDefaultControlsEnabled)
+					gameDefaultControls(&e, &horseObject, &quit, &scrollingOffsetVel);
+				else
+					projectDefaultControls(&e, &horseObject, &quit, &scrollingOffsetVel);
 			}
+
+			if (gameDefaultControlsEnabled)
+				controlGameSpeedBasedOnTime(currentTime, &scrollingOffsetVel);
 
 			horseObject.manipulateHorseOnYAxis(platformObject.checkIfHorseLandedOnPlatform(horseObject.getCollider()), obstacleObject.checkIfHorseLandedOnObstacle(horseObject.getCollider()));
 
