@@ -1,3 +1,7 @@
 ﻿  main.cpp
-C:\Users\barte\source\repos\robot_unicorn_attack\robot_unicorn_attack\main.cpp(192,13): warning C4244: "argument": konwersja z "time_t" do "unsigned int", możliwa utrata danych
+C:\Users\barte\source\repos\robot_unicorn_attack\robot_unicorn_attack\main.cpp(125,20): warning C4244: "inicjowanie": konwersja z "float" do "int", możliwa utrata danych
+C:\Users\barte\source\repos\robot_unicorn_attack\robot_unicorn_attack\main.cpp(126,143): warning C4244: "argument": konwersja z "double" do "int", możliwa utrata danych
+C:\Users\barte\source\repos\robot_unicorn_attack\robot_unicorn_attack\main.cpp(126,85): warning C4244: "argument": konwersja z "double" do "int", możliwa utrata danych
+C:\Users\barte\source\repos\robot_unicorn_attack\robot_unicorn_attack\main.cpp(139,24): warning C4244: "=": konwersja z "double" do "int", możliwa utrata danych
+C:\Users\barte\source\repos\robot_unicorn_attack\robot_unicorn_attack\main.cpp(256,13): warning C4244: "argument": konwersja z "time_t" do "unsigned int", możliwa utrata danych
   robot_unicorn_attack.vcxproj -> C:\Users\barte\source\repos\robot_unicorn_attack\Debug\robot_unicorn_attack.exe
