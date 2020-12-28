@@ -397,31 +397,33 @@ bool init(SDL_Window** window, SDL_Renderer** renderer) {
 	return success;
 }
 
-void projectDefaultControls(SDL_Event* e, Horse* horseObject, bool* quit, int* scrollingOffsetVel) {
+void projectDefaultControls(SDL_Event* e, Horse* horseObject, bool* quit, int* scrollingOffsetVel, bool* gameDefaultControlsEnabled) {
 	if ((*e).type == SDL_QUIT)
 		*quit = true;
 	else if ((*e).type == SDL_KEYDOWN && (*e).key.repeat == 0) {
 		switch ((*e).key.keysym.sym) {
 		case SDLK_RIGHT: *scrollingOffsetVel -= UNICORN_START_SPEED; break;
 		case SDLK_UP: (*horseObject).jump(true); break;
+		case SDLK_d: *gameDefaultControlsEnabled = true; break;
 		case SDLK_ESCAPE: *quit = true; break;
 		}
 	}
 	else if ((*e).type == SDL_KEYUP && (*e).key.repeat == 0) {
 		switch ((*e).key.keysym.sym) {
-		case SDLK_UP: (*horseObject).jump(false); break;
 		case SDLK_RIGHT: *scrollingOffsetVel += UNICORN_START_SPEED; break;
+		case SDLK_UP: (*horseObject).jump(false); break;
 		}
 	}
 }
 
-void gameDefaultControls(SDL_Event* e, Horse* horseObject, bool* quit, int* scrollingOffsetVel) {
+void gameDefaultControls(SDL_Event* e, Horse* horseObject, bool* quit, int* scrollingOffsetVel, bool* gameDefaultControlsEnabled) {
 	if ((*e).type == SDL_QUIT)
 		*quit = true;
 	else if ((*e).type == SDL_KEYDOWN && (*e).key.repeat == 0) {
 		switch ((*e).key.keysym.sym) {
 		case SDLK_z: (*horseObject).jump(true); break;
 		case SDLK_x: (*horseObject).dash(true); break;
+		case SDLK_d: *gameDefaultControlsEnabled = false; *scrollingOffsetVel = 0; break;
 		case SDLK_ESCAPE: *quit = true; break;
 		}
 	}
@@ -461,7 +463,7 @@ int main()
 	Obstacle obstacleObject;
 	Platform platformObject;
 	bool quit = false;
-	bool gameDefaultControlsEnabled = true;
+	bool gameDefaultControlsEnabled = false;
 	int scrollingOffsetVel = 0;
 
 	if (!init(&window, &renderer))
@@ -476,15 +478,16 @@ int main()
 
 			while (SDL_PollEvent(&e) != 0) {
 				if(gameDefaultControlsEnabled)
-					gameDefaultControls(&e, &horseObject, &quit, &scrollingOffsetVel);
+					gameDefaultControls(&e, &horseObject, &quit, &scrollingOffsetVel, &gameDefaultControlsEnabled);
 				else
-					projectDefaultControls(&e, &horseObject, &quit, &scrollingOffsetVel);
+					projectDefaultControls(&e, &horseObject, &quit, &scrollingOffsetVel, &gameDefaultControlsEnabled);
 			}
 
 			if (gameDefaultControlsEnabled)
 				controlGameSpeedBasedOnTime(currentTime, horseObject.getIsHorseDashing(), &scrollingOffsetVel);
 
-			horseObject.manipulateHorseOnYAxis(platformObject.checkIfHorseLandedOnPlatform(horseObject.getCollider()), obstacleObject.checkIfHorseLandedOnObstacle(horseObject.getCollider()));
+			horseObject.manipulateHorseOnYAxis(platformObject.checkIfHorseLandedOnPlatform(horseObject.getCollider()), 
+				obstacleObject.checkIfHorseLandedOnObstacle(horseObject.getCollider()));
 
 			SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
 			SDL_RenderClear(renderer);
