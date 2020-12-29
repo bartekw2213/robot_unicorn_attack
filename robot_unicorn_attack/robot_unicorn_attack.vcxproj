@@ -143,6 +143,17 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Obstacle.cpp" />
+    <ClCompile Include="Platform.cpp" />
+    <ClCompile Include="Texture.cpp" />
+    <ClCompile Include="Unicorn.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="constants.h" />
+    <ClInclude Include="Obstacle.h" />
+    <ClInclude Include="Platform.h" />
+    <ClInclude Include="Texture.h" />
+    <ClInclude Include="Unicorn.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
