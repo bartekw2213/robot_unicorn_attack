@@ -52,7 +52,7 @@ bool Unicorn::loadTextures(SDL_Renderer* renderer) {
 	return true;
 };
 
-void Unicorn::manipulateUnicornOnYAxis(bool unicornLandedOnPlatform, bool unicornLandedOnObstacle) {
+void Unicorn::manipulateUnicornOnYAxis(bool unicornLandedOnPlatform) {
 	// jednorozec pozostaje nieruchomy na osi Y podczas gdy wykonuje zryw
 	if (mIsUnicornDashing) {
 		mPosY -= 0;
@@ -68,7 +68,7 @@ void Unicorn::manipulateUnicornOnYAxis(bool unicornLandedOnPlatform, bool unicor
 	else if (mHowManyTimesUnicornJumped != 0 && !mIsUnicornFreeFallingAfterDash) {
 		Uint32 jumpTime = SDL_GetTicks() - mTimeWhenUnicornJumped;
 
-		if ((unicornLandedOnPlatform || unicornLandedOnObstacle) && jumpTime > JUMP_TIME_OFFSET)
+		if (unicornLandedOnPlatform && jumpTime > JUMP_TIME_OFFSET)
 			mHowManyTimesUnicornJumped = 0;
 		else if (mIsPlayerHoldingJumpKey && jumpTime <= UNICORN_MAX_LONG_JUMP_TIME && jumpTime > JUMP_TIME_OFFSET)
 			mPosY -= (UNICORN_EXTENDED_JUMP_POWER - jumpTime) / GRAVITATION_FACTOR;
@@ -78,7 +78,7 @@ void Unicorn::manipulateUnicornOnYAxis(bool unicornLandedOnPlatform, bool unicor
 			mTimeWhenFreeFallStarted = SDL_GetTicks();
 	}
 	// obsluga swobodnego spadania jednorozca - np. gdy spada z platformy lub przeszkody
-	else if (!unicornLandedOnPlatform && !unicornLandedOnObstacle) {
+	else if (!unicornLandedOnPlatform) {
 		if (mTimeWhenFreeFallStarted == 0)
 			mTimeWhenFreeFallStarted = SDL_GetTicks();
 

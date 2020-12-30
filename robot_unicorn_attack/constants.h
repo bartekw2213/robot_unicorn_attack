@@ -14,8 +14,8 @@
 #define UNICORN_EXTENDED_JUMP_POWER 500					// moc wydluzonego skoku jednorozca
 #define UNICORN_MAX_LONG_JUMP_TIME 500					// maksymalny czas trwania dlugiego skoku jednorozca
 
-#define SCREEN_WIDTH 640								// szerokosc ekranu gry
-#define SCREEN_HEIGHT 480								// wysokosc ekranu gry
+#define SCREEN_WIDTH 940								// szerokosc ekranu gry
+#define SCREEN_HEIGHT 580								// wysokosc ekranu gry
 #define GRAVITATION_FACTOR 25							// wspolczynnik grawitacji - im bedzie mniejszy tym grawitacja bedzie silniejsza
 #define JUMP_TIME_OFFSET 50								// czas po ktorym jest nasluchiwane czy jednorozec dotknal ziemi po wyskoczeniu
 
@@ -24,3 +24,25 @@
 
 #define MAX_PATH_LENGTH 250								// maksymalna dlugosc sciezki pliku
 #define MAX_UNICORNE_TEXTURE_FILE_LENGTH 5				// maksymalna dlugosc nazwy pliku z tekstura konia
+
+// test constants below
+#define DISTANCE_BETWEEN_PLATFORMS 150
+
+#define PLATFORM1_WIDTH 900
+#define PLATFORM1_HEIGHT 270
+
+#define MIN_PLATFORM1_Y SCREEN_HEIGHT - 350
+#define MAX_PLATFORM1_Y SCREEN_HEIGHT - 150
+
+#define PLATFORM1_COLLIDERS_NUM 3
+#define PLATFORMS_Y_COLLISION_OFFSET 20
+
+// platform 2
+#define PLATFORM2_WIDTH 1000
+#define PLATFORM2_HEIGHT 287
+
+#define PLATFORM2_COLLIDERS_NUM 2
+#define MAX_COLLIDERS 3
+
+#define MIN_PLATFORM2_Y SCREEN_HEIGHT - 450
+#define MAX_PLATFORM2_Y SCREEN_HEIGHT - 350

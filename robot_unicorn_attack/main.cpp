@@ -9,10 +9,9 @@
 #include "constants.h"
 #include "Texture.h"
 #include "Unicorn.h"
-#include "Obstacle.h"
-#include "Platform.h"
+#include "MyPlatform.h"
 
-bool loadMedia(Texture* bgTexture, Unicorn* unicornObject, Obstacle* obstacleObject, Platform* platformObject, SDL_Renderer* renderer) {
+bool loadMedia(Texture* bgTexture, Unicorn* unicornObject, MyPlatform* platform1, MyPlatform* platform2, SDL_Renderer* renderer) {
 	bool success = true;
 
 	char bgTexturePath[MAX_PATH_LENGTH] = "../images/background.png";
@@ -21,7 +20,7 @@ bool loadMedia(Texture* bgTexture, Unicorn* unicornObject, Obstacle* obstacleObj
 		success = false;
 	};
 
-	if (!obstacleObject->loadTexture(renderer) || !platformObject->loadTexture(renderer) || !unicornObject->loadTextures(renderer))
+	if (!platform1->loadTexture(renderer) || !platform2->loadTexture(renderer) || !unicornObject->loadTextures(renderer))
 		success = false;
 
 	return success;
@@ -108,6 +107,27 @@ void controlGameSpeedBasedOnTime(Uint32 currentTime, bool isHorseDashing, int* s
 		*scrollingOffsetVel = -((int)currentTime / 1000) / UNICORN_ACCELERATION_TEMPO - UNICORN_START_SPEED;
 }
 
+bool checkIfUnicornLandedOnPlatform(Unicorn* unicornObject, MyPlatform* platform1, MyPlatform* platform2) {
+	if (platform1->checkIfUnicornLandedOnPlatform(unicornObject->getCollider()))
+		return true;
+
+	if (platform2->checkIfUnicornLandedOnPlatform(unicornObject->getCollider()))
+		return true;
+
+	return false;
+}
+
+bool checkIfUnicornCrashedIntoPlatform(Unicorn* unicornObject, MyPlatform* platform1, MyPlatform* platform2) {
+	if (platform1->checkIfUnicornCrashedIntoPlatform(unicornObject->getCollider())) {
+		return true;
+	}
+
+	if (platform2->checkIfUnicornCrashedIntoPlatform(unicornObject->getCollider())) 
+		return true;
+
+	return false;
+}
+
 void close(SDL_Window* window, SDL_Renderer* renderer) {
 	SDL_DestroyWindow(window);
 	SDL_DestroyRenderer(renderer);
@@ -123,15 +143,18 @@ int main()
 	SDL_Event e;
 	Texture bgTexture;
 	Unicorn unicornObject;
-	Obstacle obstacleObject;
-	Platform platformObject;
+	MyPlatform platform1(1);
+	MyPlatform platform2(2);
+
 	bool quit = false;
 	bool gameDefaultControlsEnabled = false;
 	int scrollingOffsetVel = 0;
+	srand(time(0));									//	przy pomocy rand() bede generowac losowo gdzie ma pojawic sie przeszkoda lub platforma
+
 
 	if (!init(&window, &renderer))
 		printf("Failed to initialize\n");
-	else if (!loadMedia(&bgTexture, &unicornObject, &obstacleObject, &platformObject, renderer))
+	else if (!loadMedia(&bgTexture, &unicornObject, &platform1, &platform2, renderer))
 		printf("Failed to load media\n");
 	else {
 		Uint32 gameStartTime = SDL_GetTicks();
@@ -149,18 +172,17 @@ int main()
 			if (gameDefaultControlsEnabled)
 				controlGameSpeedBasedOnTime(currentTime, unicornObject.getIsUnicornDashing(), &scrollingOffsetVel);
 
-			unicornObject.manipulateUnicornOnYAxis(platformObject.checkIfHorseLandedOnPlatform(unicornObject.getCollider()), 
-				obstacleObject.checkIfHorseLandedOnObstacle(unicornObject.getCollider()));
+			unicornObject.manipulateUnicornOnYAxis(checkIfUnicornLandedOnPlatform(&unicornObject, &platform1, &platform2));
 
 			SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
 			SDL_RenderClear(renderer);
 
 			bgTexture.resizeAndRender(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, renderer);
-			platformObject.render(renderer, scrollingOffsetVel);
-			obstacleObject.render(renderer, scrollingOffsetVel);
+			platform1.render(renderer, scrollingOffsetVel);
+			platform2.render(renderer, scrollingOffsetVel);
 			unicornObject.render(renderer);
 
-			if(obstacleObject.checkIfHorseRanIntoObstacle(unicornObject.getCollider())) 
+			if(checkIfUnicornCrashedIntoPlatform(&unicornObject, &platform1, &platform2))
 				printf("Kolizja");
 
 			SDL_RenderPresent(renderer);
