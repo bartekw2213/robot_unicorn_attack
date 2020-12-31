@@ -11,7 +11,7 @@
 #include "Unicorn.h"
 #include "MyPlatform.h"
 
-bool loadMedia(Texture* bgTexture, Unicorn* unicornObject, MyPlatform* platform1, MyPlatform* platform2, MyPlatform* platform3, SDL_Renderer* renderer) {
+bool loadMedia(Texture* bgTexture, Unicorn* unicornObject, MyPlatform* platform1, MyPlatform* platform2, MyPlatform* platform3, MyPlatform* platform4, SDL_Renderer* renderer) {
 	bool success = true;
 
 	char bgTexturePath[MAX_PATH_LENGTH] = "../images/background.png";
@@ -20,7 +20,8 @@ bool loadMedia(Texture* bgTexture, Unicorn* unicornObject, MyPlatform* platform1
 		success = false;
 	};
 
-	if (!platform1->loadTexture(renderer) || !platform2->loadTexture(renderer) || !platform3->loadTexture(renderer) || !unicornObject->loadTextures(renderer))
+	if (!platform1->loadTexture(renderer) || !platform2->loadTexture(renderer) || !platform3->loadTexture(renderer) || !platform4->loadTexture(renderer) ||
+		!unicornObject->loadTextures(renderer))
 		success = false;
 
 	return success;
@@ -107,7 +108,7 @@ void controlGameSpeedBasedOnTime(Uint32 currentTime, bool isHorseDashing, int* s
 		*scrollingOffsetVel = -((int)currentTime / 1000) / UNICORN_ACCELERATION_TEMPO - UNICORN_START_SPEED;
 }
 
-bool checkIfUnicornLandedOnPlatform(Unicorn* unicornObject, MyPlatform* platform1, MyPlatform* platform2, MyPlatform* platform3) {
+bool checkIfUnicornLandedOnPlatform(Unicorn* unicornObject, MyPlatform* platform1, MyPlatform* platform2, MyPlatform* platform3, MyPlatform* platform4) {
 	if (platform1->checkIfUnicornLandedOnPlatform(unicornObject->getCollider()))
 		return true;
 
@@ -117,10 +118,13 @@ bool checkIfUnicornLandedOnPlatform(Unicorn* unicornObject, MyPlatform* platform
 	if (platform3->checkIfUnicornLandedOnPlatform(unicornObject->getCollider()))
 		return true;
 
+	if (platform4->checkIfUnicornLandedOnPlatform(unicornObject->getCollider()))
+		return true;
+
 	return false;
 }
 
-bool checkIfUnicornCrashedIntoPlatform(Unicorn* unicornObject, MyPlatform* platform1, MyPlatform* platform2, MyPlatform* platform3) {
+bool checkIfUnicornCrashedIntoPlatform(Unicorn* unicornObject, MyPlatform* platform1, MyPlatform* platform2, MyPlatform* platform3, MyPlatform* platform4) {
 	if (platform1->checkIfUnicornCrashedIntoPlatform(unicornObject->getCollider())) 
 		return true;
 
@@ -128,6 +132,9 @@ bool checkIfUnicornCrashedIntoPlatform(Unicorn* unicornObject, MyPlatform* platf
 		return true;
 
 	if (platform3->checkIfUnicornCrashedIntoPlatform(unicornObject->getCollider()))
+		return true;
+
+	if (platform4->checkIfUnicornCrashedIntoPlatform(unicornObject->getCollider()))
 		return true;
 
 	return false;
@@ -151,6 +158,7 @@ int main()
 	MyPlatform platform1(1);
 	MyPlatform platform2(2);
 	MyPlatform platform3(3);
+	MyPlatform platform4(4);
 
 	bool quit = false;
 	bool gameDefaultControlsEnabled = false;
@@ -161,7 +169,7 @@ int main()
 
 	if (!init(&window, &renderer))
 		printf("Failed to initialize\n");
-	else if (!loadMedia(&bgTexture, &unicornObject, &platform1, &platform2, &platform3, renderer))
+	else if (!loadMedia(&bgTexture, &unicornObject, &platform1, &platform2, &platform3, &platform4, renderer))
 		printf("Failed to load media\n");
 	else {
 		Uint32 gameStartTime = SDL_GetTicks();
@@ -179,7 +187,7 @@ int main()
 			if (gameDefaultControlsEnabled)
 				controlGameSpeedBasedOnTime(currentTime, unicornObject.getIsUnicornDashing(), &scrollingOffsetVel);
 
-			unicornObject.manipulateUnicornOnYAxis(checkIfUnicornLandedOnPlatform(&unicornObject, &platform1, &platform2, &platform3), &scrollingYOffsetVel);
+			unicornObject.manipulateUnicornOnYAxis(checkIfUnicornLandedOnPlatform(&unicornObject, &platform1, &platform2, &platform3, &platform4), &scrollingYOffsetVel);
 
 			SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
 			SDL_RenderClear(renderer);
@@ -188,9 +196,10 @@ int main()
 			platform1.render(renderer, scrollingOffsetVel, scrollingYOffsetVel);
 			platform2.render(renderer, scrollingOffsetVel, scrollingYOffsetVel);
 			platform3.render(renderer, scrollingOffsetVel, scrollingYOffsetVel);
+			platform4.render(renderer, scrollingOffsetVel, scrollingYOffsetVel);
 			unicornObject.render(renderer);
 
-			if(checkIfUnicornCrashedIntoPlatform(&unicornObject, &platform1, &platform2, &platform3))
+			if(checkIfUnicornCrashedIntoPlatform(&unicornObject, &platform1, &platform2, &platform3, &platform4))
 				printf("Kolizja");
 
 			SDL_RenderPresent(renderer);

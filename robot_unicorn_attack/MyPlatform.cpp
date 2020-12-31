@@ -25,6 +25,12 @@ MyPlatform::MyPlatform(int platformTypeNumber) {
 		mPlatfromCollidersNum = PLATFORM3_COLLIDERS_NUM;
 		mPosX = PLATFORM1_WIDTH + PLATFORM2_WIDTH + 2 * DISTANCE_BETWEEN_PLATFORMS;
 		break;
+	case 4:
+		mPlatformWidth = PLATFORM4_WIDTH; mPlatformHeight = PLATFORM4_HEIGHT;
+		mMinPlatformY = MIN_PLATFORM4_Y; mMaxPlatformY = MAX_PLATFORM4_Y;
+		mPlatfromCollidersNum = PLATFORM4_COLLIDERS_NUM;
+		mPosX = PLATFORM1_WIDTH + DISTANCE_BETWEEN_PLATFORMS;
+		break;
 	}
 
 	mPosY = generatePlatformY(); //odkomentowac
@@ -41,6 +47,7 @@ bool MyPlatform::loadTexture(SDL_Renderer* renderer) {
 		case 1: strncpy(platformTexturePath, "../images/platforms/platform1.png", strlen("../images/platforms/platform1.png")); break;
 		case 2: strncpy(platformTexturePath, "../images/platforms/platform2.png", strlen("../images/platforms/platform2.png")); break;
 		case 3: strncpy(platformTexturePath, "../images/platforms/platform3.png", strlen("../images/platforms/platform3.png")); break;
+		case 4: strncpy(platformTexturePath, "../images/platforms/platform4.png", strlen("../images/platforms/platform4.png")); break;
 	}
 
 	if (!(mMyPlatformTexture).loadFromFile(platformTexturePath, renderer)) {
@@ -85,6 +92,7 @@ int MyPlatform::generatePlatformX() {
 		case 1: x = PLATFORM2_WIDTH + 2 * DISTANCE_BETWEEN_PLATFORMS; break;
 		case 2: x = PLATFORM1_WIDTH + 2 * DISTANCE_BETWEEN_PLATFORMS; break;
 		case 3: x = PLATFORM2_WIDTH + 2 * DISTANCE_BETWEEN_PLATFORMS; break;
+		case 4: x = PLATFORM1_WIDTH + 2 * DISTANCE_BETWEEN_PLATFORMS; break;
 	}
 
 	return x;
@@ -110,6 +118,12 @@ void MyPlatform::shiftColliders() {
 			mPlatformColliders[0].y = mPosY;
 			mPlatformColliders[0].x = mPosX;
 			break;
+		case 4:
+			mPlatformColliders[0].y = mPosY + mPlatformHeight / 7;
+			mPlatformColliders[0].x = mPosX;
+			mPlatformColliders[1].y = mPosY;
+			mPlatformColliders[1].x = mPosX + mPlatformWidth / 2;
+			break;
 	}
 		
 };
@@ -134,6 +148,12 @@ void MyPlatform::createPlatformColliders(SDL_Rect platformColliders[MAX_COLLIDER
 		case 3:
 			platformColliders[0].w = mPlatformWidth;
 			platformColliders[0].h = mPlatformHeight / 2;
+			break;
+		case 4:
+			platformColliders[0].w = mPlatformWidth;
+			platformColliders[0].h = mPlatformHeight / 2;
+			platformColliders[1].w = mPlatformWidth / 2;
+			platformColliders[1].h = mPlatformHeight / 5;
 			break;
 	}
 }
