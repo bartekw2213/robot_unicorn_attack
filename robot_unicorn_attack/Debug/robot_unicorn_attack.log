@@ -1,4 +1,3 @@
-﻿  main.cpp
+﻿  Texture.cpp
 C:\Users\barte\source\repos\robot_unicorn_attack\robot_unicorn_attack\Texture.h(3,10): warning C4067: nieoczekiwane tokeny występujące po dyrektywie preprocesora - oczekiwano nowego wiersza
-C:\Users\barte\source\repos\robot_unicorn_attack\robot_unicorn_attack\main.cpp(151,12): warning C4244: "argument": konwersja z "time_t" do "unsigned int", możliwa utrata danych
   robot_unicorn_attack.vcxproj -> C:\Users\barte\source\repos\robot_unicorn_attack\Debug\robot_unicorn_attack.exe

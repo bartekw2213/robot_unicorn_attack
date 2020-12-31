@@ -12,7 +12,7 @@ public:
 	void render(SDL_Renderer* renderer);
 	void shiftCollider();
 	bool loadTextures(SDL_Renderer* renderer);
-	void manipulateUnicornOnYAxis(bool unicornLandedOnPlatform);
+	void manipulateUnicornOnYAxis(bool unicornLandedOnPlatform, int* scrollingYOffset);
 	void jump(bool isPlayerHoldingJumpKey);
 	void dash(bool isPlayerHoldingDash);
 	bool getIsUnicornDashing();

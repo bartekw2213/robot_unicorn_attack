@@ -5,7 +5,7 @@
 
 Unicorn::Unicorn() {
 	mPosX = 0;
-	mPosY = 0;
+	mPosY = SCREEN_HEIGHT / 3;
 	mHowManyTimesUnicornJumped = 0;
 	mTimeWhenUnicornJumped = 0;
 	mTimeWhenFreeFallStarted = 0;
@@ -52,10 +52,10 @@ bool Unicorn::loadTextures(SDL_Renderer* renderer) {
 	return true;
 };
 
-void Unicorn::manipulateUnicornOnYAxis(bool unicornLandedOnPlatform) {
+void Unicorn::manipulateUnicornOnYAxis(bool unicornLandedOnPlatform, int* scrollingYOffsetVel) {
 	// jednorozec pozostaje nieruchomy na osi Y podczas gdy wykonuje zryw
 	if (mIsUnicornDashing) {
-		mPosY -= 0;
+		*scrollingYOffsetVel = 0;
 
 		// wylacza zryw jednorozca po okreslonym czasie
 		if (SDL_GetTicks() - mTimeWhenUnicornDashed > UNICORN_DASH_TIME) {
@@ -71,9 +71,9 @@ void Unicorn::manipulateUnicornOnYAxis(bool unicornLandedOnPlatform) {
 		if (unicornLandedOnPlatform && jumpTime > JUMP_TIME_OFFSET)
 			mHowManyTimesUnicornJumped = 0;
 		else if (mIsPlayerHoldingJumpKey && jumpTime <= UNICORN_MAX_LONG_JUMP_TIME && jumpTime > JUMP_TIME_OFFSET)
-			mPosY -= (UNICORN_EXTENDED_JUMP_POWER - jumpTime) / GRAVITATION_FACTOR;
+			*scrollingYOffsetVel = (UNICORN_EXTENDED_JUMP_POWER - jumpTime) / GRAVITATION_FACTOR;
 		else if ((UNICORN_NORMAL_JUMP_POWER - jumpTime / GRAVITATION_FACTOR) > 0)
-			mPosY -= (UNICORN_NORMAL_JUMP_POWER - jumpTime / GRAVITATION_FACTOR);
+			*scrollingYOffsetVel = (UNICORN_NORMAL_JUMP_POWER - jumpTime / GRAVITATION_FACTOR);
 		else
 			mTimeWhenFreeFallStarted = SDL_GetTicks();
 	}
@@ -83,9 +83,10 @@ void Unicorn::manipulateUnicornOnYAxis(bool unicornLandedOnPlatform) {
 			mTimeWhenFreeFallStarted = SDL_GetTicks();
 
 		Uint32 freeFallTime = SDL_GetTicks() - mTimeWhenFreeFallStarted;
-		mPosY += freeFallTime / GRAVITATION_FACTOR;
+		*scrollingYOffsetVel = 0 - (freeFallTime / GRAVITATION_FACTOR);
 	}
 	else {
+		*scrollingYOffsetVel = 0;
 		mTimeWhenFreeFallStarted = 0;
 		mIsUnicornFreeFallingAfterDash = false;
 	}

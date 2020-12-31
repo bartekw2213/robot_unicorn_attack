@@ -19,9 +19,15 @@ MyPlatform::MyPlatform(int platformTypeNumber) {
 		mPlatfromCollidersNum = PLATFORM2_COLLIDERS_NUM;
 		mPosX = PLATFORM1_WIDTH + DISTANCE_BETWEEN_PLATFORMS;
 		break;
+	case 3:
+		mPlatformWidth = PLATFORM3_WIDTH; mPlatformHeight = PLATFORM3_HEIGHT;
+		mMinPlatformY = MIN_PLATFORM3_Y; mMaxPlatformY = MAX_PLATFORM3_Y;
+		mPlatfromCollidersNum = PLATFORM3_COLLIDERS_NUM;
+		mPosX = PLATFORM1_WIDTH + PLATFORM2_WIDTH + 2 * DISTANCE_BETWEEN_PLATFORMS;
+		break;
 	}
 
-	mPosY = generatePlatformY();
+	mPosY = generatePlatformY(); //odkomentowac
 }
 
 MyPlatform::~MyPlatform() {
@@ -34,7 +40,7 @@ bool MyPlatform::loadTexture(SDL_Renderer* renderer) {
 	switch (mPlatformTypeNumber) {
 		case 1: strncpy(platformTexturePath, "../images/platforms/platform1.png", strlen("../images/platforms/platform1.png")); break;
 		case 2: strncpy(platformTexturePath, "../images/platforms/platform2.png", strlen("../images/platforms/platform2.png")); break;
-		default: strncpy(platformTexturePath, "../images/platforms/platform1.png", strlen("../images/platforms/platform1.png")); break;
+		case 3: strncpy(platformTexturePath, "../images/platforms/platform3.png", strlen("../images/platforms/platform3.png")); break;
 	}
 
 	if (!(mMyPlatformTexture).loadFromFile(platformTexturePath, renderer)) {
@@ -47,17 +53,18 @@ bool MyPlatform::loadTexture(SDL_Renderer* renderer) {
 	return true;
 }
 
-void MyPlatform::render(SDL_Renderer* renderer, int scrollingOffsetVel) {
+void MyPlatform::render(SDL_Renderer* renderer, int scrollingOffsetVel, int scrollingYOffsetVel) {
 	mPosX += scrollingOffsetVel;
+	mPosY += scrollingYOffsetVel;
 
 	mMyPlatformTexture.resizeAndRender(mPosX, mPosY, mPlatformWidth, mPlatformHeight, renderer);
+	shiftColliders();
 
 	if (mPosX < -mPlatformWidth) {
 		mPosX = generatePlatformX();
 		mPosY = generatePlatformY();
 	}
 
-	shiftColliders();
 }
 
 int MyPlatform::generatePlatformY() {
@@ -77,6 +84,7 @@ int MyPlatform::generatePlatformX() {
 	switch (mPlatformTypeNumber) {
 		case 1: x = PLATFORM2_WIDTH + 2 * DISTANCE_BETWEEN_PLATFORMS; break;
 		case 2: x = PLATFORM1_WIDTH + 2 * DISTANCE_BETWEEN_PLATFORMS; break;
+		case 3: x = PLATFORM2_WIDTH + 2 * DISTANCE_BETWEEN_PLATFORMS; break;
 	}
 
 	return x;
@@ -97,6 +105,10 @@ void MyPlatform::shiftColliders() {
 			mPlatformColliders[0].x = mPosX;
 			mPlatformColliders[1].y = mPosY;
 			mPlatformColliders[1].x = mPosX + mPlatformWidth / 1.7;
+			break;
+		case 3: 
+			mPlatformColliders[0].y = mPosY;
+			mPlatformColliders[0].x = mPosX;
 			break;
 	}
 		
@@ -119,6 +131,10 @@ void MyPlatform::createPlatformColliders(SDL_Rect platformColliders[MAX_COLLIDER
 			platformColliders[1].w = mPlatformWidth / 2.5;
 			platformColliders[1].h = mPlatformHeight / 4;
 			break;
+		case 3:
+			platformColliders[0].w = mPlatformWidth;
+			platformColliders[0].h = mPlatformHeight / 2;
+			break;
 	}
 }
 
@@ -133,7 +149,7 @@ bool MyPlatform::checkIfUnicornLandedOnPlatform(SDL_Rect* unicornCollider) {
 	unicornEndX = (*unicornCollider).x + (*unicornCollider).w;
 
 	for(int i = 0; i < mPlatfromCollidersNum; i++)
-		if (bottomUnicornCollider >= mPlatformColliders[i].y &&
+		if (bottomUnicornCollider >= mPlatformColliders[i].y - PLATFORMS_Y_COLLISION_OFFSET &&
 			bottomUnicornCollider <= mPlatformColliders[i].y + mPlatformColliders[i].h &&
 			unicornEndX >= mPlatformColliders[i].x &&
 			unicornStartX <= mPlatformColliders[i].x + mPlatformColliders[i].w) 
@@ -143,13 +159,15 @@ bool MyPlatform::checkIfUnicornLandedOnPlatform(SDL_Rect* unicornCollider) {
 };
 
 bool MyPlatform::checkIfUnicornCrashedIntoPlatform(SDL_Rect* unicornCollider) {
-	int unicornBottomY, unicornRightX, unicornLeftX;
+	int unicornBottomY, unicornTopY, unicornRightX, unicornLeftX;
+	unicornTopY = (*unicornCollider).y;
 	unicornBottomY = (*unicornCollider).y + (*unicornCollider).h;
 	unicornRightX = (*unicornCollider).x + (*unicornCollider).w;
 	unicornLeftX = (*unicornCollider).x;
 
 	for (int i = 0; i < mPlatfromCollidersNum; i++)
 		if (unicornRightX > mPlatformColliders[i].x &&
+			unicornTopY < mPlatformColliders[i].y + mPlatformColliders[i].h &&
 			unicornBottomY > mPlatformColliders[i].y + PLATFORMS_Y_COLLISION_OFFSET &&
 			unicornLeftX < mPlatformColliders[i].x + mPlatformColliders[i].w) 
 			return true;
