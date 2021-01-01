@@ -197,7 +197,7 @@ int main()
 			platform2.render(renderer, scrollingOffsetVel, scrollingYOffsetVel);
 			platform3.render(renderer, scrollingOffsetVel, scrollingYOffsetVel);
 			platform4.render(renderer, scrollingOffsetVel, scrollingYOffsetVel);
-			unicornObject.render(renderer);
+			unicornObject.render(renderer, scrollingYOffsetVel);
 
 			if(checkIfUnicornCrashedIntoPlatform(&unicornObject, &platform1, &platform2, &platform3, &platform4))
 				printf("Kolizja");
@@ -205,8 +205,9 @@ int main()
 			SDL_RenderPresent(renderer);
 		}
 
-		close(window, renderer);
 	}
+		
+	close(window, renderer);
 
     return 0;
 }

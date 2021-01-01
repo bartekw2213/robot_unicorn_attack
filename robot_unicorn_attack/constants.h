@@ -1,6 +1,8 @@
 #pragma once
 #define UNICORN_TEXTURES_NUM 450						// ilosc tekstur skladajacych sie na animacje biegnacego konia
 #define UNICORN_DASHING_TEXTURES_NUM 16					// ilosc tekstur skladajacych sie na anmiacje dashujacego jednorozca
+#define UNICORN_FALLING_TEXTURES_NUM 16
+#define UNICORN_JUMPING_TEXTURES_NUM 4
 #define UNICORN_TEXTURES_DASH_TO_RUN_SIZE_RATIO 1.5		// ile razy wieksza powinna byc tekstura dashujacego jednorozca od tego biegnacego
 #define UNICORN_WIDTH 200								// szerokosc tekstury jednorozca
 #define UNICORN_HEIGHT 106								// wysokosc tekstury jednorozca

@@ -9,7 +9,7 @@ public:
 	Unicorn();
 	~Unicorn();
 
-	void render(SDL_Renderer* renderer);
+	void render(SDL_Renderer* renderer, int scrollingYOffsetVel);
 	void shiftCollider();
 	bool loadTextures(SDL_Renderer* renderer);
 	void manipulateUnicornOnYAxis(bool unicornLandedOnPlatform, int* scrollingYOffset);
@@ -24,7 +24,8 @@ private:
 	int mPosX, mPosY;
 	SDL_Rect mCollider;
 	Uint32 mTimeWhenUnicornJumped, mTimeWhenFreeFallStarted, mTimeWhenUnicornDashed;
-	Texture mUnicornRunningTextures[UNICORN_TEXTURES_NUM], mUnicornDashingTextures[UNICORN_DASHING_TEXTURES_NUM];
+	Texture mUnicornRunningTextures[UNICORN_TEXTURES_NUM], mUnicornDashingTextures[UNICORN_DASHING_TEXTURES_NUM], 
+		mUnicornFallingTextures[UNICORN_FALLING_TEXTURES_NUM], mUnicornJumpingTextures[UNICORN_JUMPING_TEXTURES_NUM];
 
 	bool mLoadUnicornAnimationFrames(int numOfFrames, char const* pathToFolderWithFrames, Texture* arrayOfFrames, SDL_Renderer* renderer);
 };

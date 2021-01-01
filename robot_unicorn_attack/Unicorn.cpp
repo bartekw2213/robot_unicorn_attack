@@ -23,10 +23,18 @@ Unicorn::~Unicorn() {
 		mUnicornRunningTextures[i].free();
 };
 
-void Unicorn::render(SDL_Renderer* renderer) {
+void Unicorn::render(SDL_Renderer* renderer, int scrollingYOffsetVel) {
 	if (mIsUnicornDashing) {
 		int frameToDraw = (SDL_GetTicks() - mTimeWhenUnicornDashed) / (float)UNICORN_DASH_TIME * (UNICORN_DASHING_TEXTURES_NUM - 1);
 		mUnicornDashingTextures[frameToDraw].resizeAndRender(mPosX, mPosY, UNICORN_WIDTH * UNICORN_TEXTURES_DASH_TO_RUN_SIZE_RATIO, UNICORN_HEIGHT * UNICORN_TEXTURES_DASH_TO_RUN_SIZE_RATIO, renderer);
+	}
+	else if (scrollingYOffsetVel < 0) {
+		int frameToDraw = SDL_GetTicks() % UNICORN_FALLING_TEXTURES_NUM;
+		mUnicornFallingTextures[frameToDraw].resizeAndRender(mPosX, mPosY, UNICORN_WIDTH, UNICORN_HEIGHT, renderer);
+	}
+	else if (scrollingYOffsetVel > 0) {
+		int frameToDraw = SDL_GetTicks() % UNICORN_JUMPING_TEXTURES_NUM;
+		mUnicornJumpingTextures[frameToDraw].resizeAndRender(mPosX, mPosY, UNICORN_WIDTH, UNICORN_HEIGHT, renderer);
 	}
 	else {
 		int frameToDraw = SDL_GetTicks() % UNICORN_TEXTURES_NUM;
@@ -47,6 +55,12 @@ bool Unicorn::loadTextures(SDL_Renderer* renderer) {
 		return false;
 
 	if (!mLoadUnicornAnimationFrames(UNICORN_DASHING_TEXTURES_NUM, "../images/unicorn_dash/", mUnicornDashingTextures, renderer))
+		return false;
+
+	if (!mLoadUnicornAnimationFrames(UNICORN_FALLING_TEXTURES_NUM, "../images/unicorn_falling/", mUnicornFallingTextures, renderer))
+		return false;
+
+	if (!mLoadUnicornAnimationFrames(UNICORN_JUMPING_TEXTURES_NUM, "../images/unicorn_jump/", mUnicornJumpingTextures, renderer))
 		return false;
 
 	return true;
