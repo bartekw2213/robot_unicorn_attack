@@ -15,6 +15,7 @@
 #define UNICORN_NORMAL_JUMP_POWER 15					// moc normalnego skoku jednorozca
 #define UNICORN_EXTENDED_JUMP_POWER 500					// moc wydluzonego skoku jednorozca
 #define UNICORN_MAX_LONG_JUMP_TIME 500					// maksymalny czas trwania dlugiego skoku jednorozca
+#define UNICORN_WISHES_NUM 3
 
 #define SCREEN_WIDTH 940								// szerokosc ekranu gry
 #define SCREEN_HEIGHT 580								// wysokosc ekranu gry

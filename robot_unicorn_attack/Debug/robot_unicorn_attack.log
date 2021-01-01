@@ -1,7 +1,12 @@
-﻿  Unicorn.cpp
+﻿  MyPlatform.cpp
 C:\Users\barte\source\repos\robot_unicorn_attack\robot_unicorn_attack\Texture.h(3,10): warning C4067: nieoczekiwane tokeny występujące po dyrektywie preprocesora - oczekiwano nowego wiersza
-C:\Users\barte\source\repos\robot_unicorn_attack\robot_unicorn_attack\Unicorn.cpp(28,19): warning C4244: "inicjowanie": konwersja z "float" do "int", możliwa utrata danych
-C:\Users\barte\source\repos\robot_unicorn_attack\robot_unicorn_attack\Unicorn.cpp(29,142): warning C4244: "argument": konwersja z "double" do "int", możliwa utrata danych
-C:\Users\barte\source\repos\robot_unicorn_attack\robot_unicorn_attack\Unicorn.cpp(29,84): warning C4244: "argument": konwersja z "double" do "int", możliwa utrata danych
-C:\Users\barte\source\repos\robot_unicorn_attack\robot_unicorn_attack\Unicorn.cpp(50,23): warning C4244: "=": konwersja z "double" do "int", możliwa utrata danych
+C:\Users\barte\source\repos\robot_unicorn_attack\robot_unicorn_attack\MyPlatform.cpp(107,36): warning C4244: "=": konwersja z "double" do "int", możliwa utrata danych
+C:\Users\barte\source\repos\robot_unicorn_attack\robot_unicorn_attack\MyPlatform.cpp(109,36): warning C4244: "=": konwersja z "double" do "int", możliwa utrata danych
+C:\Users\barte\source\repos\robot_unicorn_attack\robot_unicorn_attack\MyPlatform.cpp(115,36): warning C4244: "=": konwersja z "double" do "int", możliwa utrata danych
+C:\Users\barte\source\repos\robot_unicorn_attack\robot_unicorn_attack\MyPlatform.cpp(143,44): warning C4244: "=": konwersja z "double" do "int", możliwa utrata danych
+C:\Users\barte\source\repos\robot_unicorn_attack\robot_unicorn_attack\MyPlatform.cpp(145,44): warning C4244: "=": konwersja z "double" do "int", możliwa utrata danych
+  main.cpp
+C:\Users\barte\source\repos\robot_unicorn_attack\robot_unicorn_attack\Texture.h(3,10): warning C4067: nieoczekiwane tokeny występujące po dyrektywie preprocesora - oczekiwano nowego wiersza
+C:\Users\barte\source\repos\robot_unicorn_attack\robot_unicorn_attack\main.cpp(278,12): warning C4244: "argument": konwersja z "time_t" do "unsigned int", możliwa utrata danych
+  Generowanie kodu...
   robot_unicorn_attack.vcxproj -> C:\Users\barte\source\repos\robot_unicorn_attack\Debug\robot_unicorn_attack.exe

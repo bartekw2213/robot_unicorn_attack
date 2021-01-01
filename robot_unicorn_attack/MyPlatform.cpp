@@ -33,7 +33,7 @@ MyPlatform::MyPlatform(int platformTypeNumber) {
 		break;
 	}
 
-	mPosY = generatePlatformY(); //odkomentowac
+	mPosY = generatePlatformY();
 }
 
 MyPlatform::~MyPlatform() {
