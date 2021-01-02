@@ -27,7 +27,9 @@ private:
 
 	int generatePlatformY();
 	int generatePlatformX();
-	void createPlatformColliders(SDL_Rect platformColliders[MAX_COLLIDERS]);
 	void shiftColliders();
+	void createPlatformColliders(SDL_Rect platformColliders[MAX_COLLIDERS]);
+	bool checkIfUnicornLandedOnCollider(SDL_Rect* platformCollider, SDL_Rect* unicornCollider);
+	bool checkIfUnicornCrashedIntoCollider(SDL_Rect* platformCollider, SDL_Rect* unicornCollider);
 };
 

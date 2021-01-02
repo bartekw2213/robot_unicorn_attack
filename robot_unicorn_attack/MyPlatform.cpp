@@ -173,34 +173,55 @@ SDL_Rect* MyPlatform::getCollider(int colliderNum) {
 	return &mPlatformColliders[colliderNum];
 };
 
-bool MyPlatform::checkIfUnicornLandedOnPlatform(SDL_Rect* unicornCollider) {
-	int bottomUnicornCollider, unicornStartX, unicornEndX;
-	bottomUnicornCollider = (*unicornCollider).y + (*unicornCollider).h;
-	unicornStartX = (*unicornCollider).x;
-	unicornEndX = (*unicornCollider).x + (*unicornCollider).w;
+bool MyPlatform::checkIfUnicornLandedOnCollider(SDL_Rect* platformCollider, SDL_Rect* unicornCollider) {
+	int unicornLeftX = unicornCollider->x;
+	int unicornRightX = unicornCollider->x + unicornCollider->w;
+	int unicornBottomY = unicornCollider->y + unicornCollider->h;
 
-	for(int i = 0; i < mPlatfromCollidersNum; i++)
-		if (bottomUnicornCollider >= mPlatformColliders[i].y - PLATFORMS_Y_COLLISION_OFFSET &&
-			bottomUnicornCollider <= mPlatformColliders[i].y + mPlatformColliders[i].h &&
-			unicornEndX >= mPlatformColliders[i].x &&
-			unicornStartX <= mPlatformColliders[i].x + mPlatformColliders[i].w) 
+	if (unicornBottomY < platformCollider->y - PLATFORMS_Y_COLLISION_OFFSET)
+		return false;
+	else if (unicornBottomY > platformCollider->y + PLATFORMS_Y_COLLISION_OFFSET)
+		return false;
+	else if (unicornRightX < platformCollider->x)
+		return false;
+	else if (unicornLeftX > platformCollider->x + platformCollider->w)
+		return false;
+
+	return true;
+}
+
+bool MyPlatform::checkIfUnicornCrashedIntoCollider(SDL_Rect* platformCollider, SDL_Rect* unicornCollider) {
+	int unicornTopY = unicornCollider->y;
+	int unicornBottomY = unicornCollider->y + unicornCollider->h;
+	int unicornRightX = unicornCollider->x + unicornCollider->w;
+	int unicornLeftX = unicornCollider->x;
+
+	if (checkIfUnicornLandedOnCollider(platformCollider, unicornCollider))
+		return false;
+
+	if (unicornRightX < platformCollider->x)
+		return false;
+	else if (unicornLeftX > platformCollider->x + platformCollider->w)
+		return false;
+	else if (unicornTopY > platformCollider->y + platformCollider->h)
+		return false;
+	else if (unicornBottomY < platformCollider->y)
+		return false;
+
+	return true;
+}
+
+bool MyPlatform::checkIfUnicornLandedOnPlatform(SDL_Rect* unicornCollider) {
+	for (int i = 0; i < mPlatfromCollidersNum; i++)
+		if (checkIfUnicornLandedOnCollider(&mPlatformColliders[i], unicornCollider))
 			return true;
 
 	return false;
 };
 
 bool MyPlatform::checkIfUnicornCrashedIntoPlatform(SDL_Rect* unicornCollider) {
-	int unicornBottomY, unicornTopY, unicornRightX, unicornLeftX;
-	unicornTopY = (*unicornCollider).y;
-	unicornBottomY = (*unicornCollider).y + (*unicornCollider).h;
-	unicornRightX = (*unicornCollider).x + (*unicornCollider).w;
-	unicornLeftX = (*unicornCollider).x;
-
 	for (int i = 0; i < mPlatfromCollidersNum; i++)
-		if (unicornRightX > mPlatformColliders[i].x &&
-			unicornTopY < mPlatformColliders[i].y + mPlatformColliders[i].h &&
-			unicornBottomY > mPlatformColliders[i].y + PLATFORMS_Y_COLLISION_OFFSET &&
-			unicornLeftX < mPlatformColliders[i].x + mPlatformColliders[i].w) 
+		if (checkIfUnicornCrashedIntoCollider(&mPlatformColliders[i], unicornCollider))
 			return true;
 
 	return false;
