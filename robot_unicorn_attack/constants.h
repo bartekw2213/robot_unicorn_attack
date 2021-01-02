@@ -12,6 +12,7 @@
 #define UNICORN_DASH_SPEED 40							// predkosc jaka osiaga jednorozec podczas wykonywania zrywu
 #define UNICORN_DASH_TIME 500							// czas trwania zrywu jednorozca
 #define UNICORN_EXPLOSION_TIME 500
+#define UNICORN_FELLING_OVER_TIME 500
 #define UNICORN_TIME_BETWEEN_DASHES 2000				// czas jaki musi minac by gracz ponownie mogl wykonac zryw
 #define UNICORN_ACCELERATION_TEMPO 5					// im wiêksza sta³a tym wolniej gra bêdzie przyœpieszaæ
 #define UNICORN_NORMAL_JUMP_POWER 15					// moc normalnego skoku jednorozca
@@ -30,13 +31,15 @@
 #define MAX_PATH_LENGTH 250								// maksymalna dlugosc sciezki pliku
 #define MAX_TEXTURE_FILE_LENGTH 5						// maksymalna dlugosc nazwy pliku z tekstura konia
 
+#define PLATFORMS_Y_WHEN_FELL_OVER_IS_DETECTED -1000
+
 //
 #define SUBTITLES_TEXTURES_NUM 5
 #define START_SUBTITLE_INDEX 0
 #define AGAIN_SUBTITLE_INDEX 1
 
 // test constants below
-#define DISTANCE_BETWEEN_PLATFORMS 350
+#define DISTANCE_BETWEEN_PLATFORMS 500
 #define PLATFORM_TYPES 4
 
 #define PLATFORM1_WIDTH 900

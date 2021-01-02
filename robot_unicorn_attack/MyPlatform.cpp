@@ -224,3 +224,7 @@ void MyPlatform::restartPlatform() {
 
 	mPosY = generatePlatformY();
 }
+
+int MyPlatform::getPosY() {
+	return mPosY;
+}

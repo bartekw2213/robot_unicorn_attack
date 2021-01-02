@@ -9,8 +9,11 @@ Unicorn::Unicorn() {
 	mHowManyTimesUnicornJumped = 0;
 	mTimeWhenUnicornJumped = 0;
 	mTimeWhenFreeFallStarted = 0;
+	mTimeWhenUnicornExploded = 0;
+	mTimeWhenUnicornFellOver = 0;
 	mTimeWhenUnicornDashed = 0;
 	mDoesUnicornExploded = false;
+	mDoesUnicornFellOver = false;
 	mIsUnicornDashing = false;
 	mIsPlayerHoldingJumpKey = false;
 	mIsUnicornFreeFallingAfterDash = false;
@@ -35,6 +38,10 @@ void Unicorn::render(SDL_Renderer* renderer, int scrollingYOffsetVel) {
 	}
 	else if (scrollingYOffsetVel < 0) {
 		int frameToDraw = SDL_GetTicks() % UNICORN_FALLING_TEXTURES_NUM;
+
+		if(mDoesUnicornFellOver)
+			mPosY -= scrollingYOffsetVel;
+
 		mUnicornFallingTextures[frameToDraw].resizeAndRender(mPosX, mPosY, UNICORN_WIDTH, UNICORN_HEIGHT, renderer);
 	}
 	else if (scrollingYOffsetVel > 0) {
@@ -149,6 +156,14 @@ void Unicorn::explode() {
 	mDoesUnicornExploded = true;
 }
 
+void Unicorn::fellOver() {
+	if (mDoesUnicornFellOver)
+		return;
+
+	mTimeWhenUnicornFellOver = SDL_GetTicks();
+	mDoesUnicornFellOver = true;
+}
+
 bool Unicorn::getIsUnicornDashing() {
 	return mIsUnicornDashing;
 };
@@ -159,6 +174,13 @@ bool Unicorn::getDoesUnicornExploded() {
 
 bool Unicorn::hasExplosionEnded() {
 	return SDL_GetTicks() - mTimeWhenUnicornExploded >= UNICORN_EXPLOSION_TIME;
+}
+
+bool Unicorn::hasFallingOverEnded() {
+	if (mTimeWhenUnicornFellOver == 0)
+		return false;
+
+	return SDL_GetTicks() - mTimeWhenUnicornFellOver >= UNICORN_FELLING_OVER_TIME;
 }
 
 SDL_Rect* Unicorn::getCollider() {
@@ -192,8 +214,11 @@ void Unicorn::restartUnicorn() {
 	mHowManyTimesUnicornJumped = 0;
 	mTimeWhenUnicornJumped = 0;
 	mTimeWhenFreeFallStarted = 0;
+	mTimeWhenUnicornExploded = 0;
+	mTimeWhenUnicornFellOver = 0;
 	mTimeWhenUnicornDashed = 0;
 	mDoesUnicornExploded = false;
+	mDoesUnicornFellOver = false;
 	mIsUnicornDashing = false;
 	mIsPlayerHoldingJumpKey = false;
 	mIsUnicornFreeFallingAfterDash = false;

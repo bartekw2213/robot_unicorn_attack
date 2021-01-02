@@ -14,6 +14,7 @@ public:
 	void render(SDL_Renderer* renderer, int scrollingOffsetVel, int scrollingYOffsetVel);
 	void restartPlatform();
 	SDL_Rect* getCollider(int colliderNum);
+	int getPosY();
 
 private:
 	int mPosX, mPosY;

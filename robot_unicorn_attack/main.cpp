@@ -143,8 +143,10 @@ void handleMainMenu(SDL_Event* e, SDL_Renderer* renderer, Texture* startingScree
 }
 
 void projectDefaultControls(SDL_Event* e, Unicorn* unicornObject, bool* quit, bool* closeProgram, int* scrollingOffsetVel, bool* gameDefaultControlsEnabled) {
-	if ((*e).type == SDL_QUIT)
+	if ((*e).type == SDL_QUIT) {
 		*quit = true;
+		*closeProgram = true;
+	}
 	else if ((*e).type == SDL_KEYDOWN && (*e).key.repeat == 0) {
 		switch ((*e).key.keysym.sym) {
 		case SDLK_RIGHT: *scrollingOffsetVel -= UNICORN_START_SPEED; break;
@@ -162,8 +164,10 @@ void projectDefaultControls(SDL_Event* e, Unicorn* unicornObject, bool* quit, bo
 }
 
 void gameDefaultControls(SDL_Event* e, Unicorn* unicornObject, bool* quit, bool* closeProgram, int* scrollingOffsetVel, bool* gameDefaultControlsEnabled) {
-	if ((*e).type == SDL_QUIT)
+	if ((*e).type == SDL_QUIT) {
 		*quit = true;
+		*closeProgram = true;
+	}
 	else if ((*e).type == SDL_KEYDOWN && (*e).key.repeat == 0) {
 		switch ((*e).key.keysym.sym) {
 		case SDLK_z: (*unicornObject).jump(true); break;
@@ -204,6 +208,14 @@ bool checkIfUnicornCrashedIntoPlatform(Unicorn* unicornObject, MyPlatform platfo
 			return true;
 
 	return false;
+}
+
+bool checkIfUnicornFellOfPlatforms(MyPlatform platforms[PLATFORM_TYPES]) {
+	for (int i = 0; i < PLATFORM_TYPES; i++)
+		if (platforms[i].getPosY() >= PLATFORMS_Y_WHEN_FELL_OVER_IS_DETECTED)
+			return false;
+
+	return true;
 }
 
 void close(SDL_Window* window, SDL_Renderer* renderer) {
@@ -257,6 +269,9 @@ void handleGameplay(SDL_Event* e, SDL_Renderer* renderer, bool* closeProgram, Un
 		if (checkIfUnicornCrashedIntoPlatform(unicornObject, platforms))
 			unicornObject->explode();
 
+		if (checkIfUnicornFellOfPlatforms(platforms))
+			unicornObject->fellOver();
+
 		if (unicornObject->getDoesUnicornExploded()) {
 			scrollingOffsetVel = 1;
 			scrollingYOffsetVel = -1;
@@ -264,6 +279,9 @@ void handleGameplay(SDL_Event* e, SDL_Renderer* renderer, bool* closeProgram, Un
 			if (unicornObject->hasExplosionEnded())
 				quit = true;
 		}
+
+		if (unicornObject->hasFallingOverEnded()) 
+			quit = true;
 
 		unicornObject->manipulateUnicornOnYAxis(checkIfUnicornLandedOnPlatform(unicornObject, platforms), &scrollingYOffsetVel);
 		renderTextures(renderer, bgTexture, unicornObject, platforms, wishesLeftIconsTextures, scrollingOffsetVel, scrollingYOffsetVel);
@@ -276,8 +294,10 @@ void handleEndScreen(SDL_Event* e, SDL_Renderer* renderer, bool* closeProgram, T
 	while (!quit) {
 
 		while (SDL_PollEvent(e) != 0) {
-			if ((*e).type == SDL_QUIT)
+			if ((*e).type == SDL_QUIT) {
 				quit = true;
+				*closeProgram = true;
+			}
 			else if ((*e).type == SDL_KEYDOWN && (*e).key.repeat == 0) {
 				switch ((*e).key.keysym.sym) {
 				case SDLK_z: quit = true; break;

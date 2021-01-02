@@ -17,17 +17,19 @@ public:
 	void jump(bool isPlayerHoldingJumpKey);
 	void dash(bool isPlayerHoldingDash);
 	void explode();
+	void fellOver();
 	bool getIsUnicornDashing();
 	bool getDoesUnicornExploded();
 	bool hasExplosionEnded();
+	bool hasFallingOverEnded();
 	SDL_Rect* getCollider();
 
 private:
-	bool mIsPlayerHoldingJumpKey, mIsUnicornDashing, mIsUnicornFreeFallingAfterDash, mDoesUnicornExploded;
+	bool mIsPlayerHoldingJumpKey, mIsUnicornDashing, mIsUnicornFreeFallingAfterDash, mDoesUnicornExploded, mDoesUnicornFellOver;
 	int mHowManyTimesUnicornJumped;
 	int mPosX, mPosY;
 	SDL_Rect mCollider;
-	Uint32 mTimeWhenUnicornJumped, mTimeWhenFreeFallStarted, mTimeWhenUnicornDashed, mTimeWhenUnicornExploded;
+	Uint32 mTimeWhenUnicornJumped, mTimeWhenFreeFallStarted, mTimeWhenUnicornDashed, mTimeWhenUnicornExploded, mTimeWhenUnicornFellOver;
 	Texture mUnicornRunningTextures[UNICORN_TEXTURES_NUM], mUnicornDashingTextures[UNICORN_DASHING_TEXTURES_NUM], 
 		mUnicornFallingTextures[UNICORN_FALLING_TEXTURES_NUM], mUnicornJumpingTextures[UNICORN_JUMPING_TEXTURES_NUM],
 		mUnicornExplosionTextures[UNICORN_EXPLOSION_TEXTURES_NUM];
