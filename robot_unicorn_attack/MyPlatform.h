@@ -4,13 +4,15 @@
 
 class MyPlatform {
 public:
-	MyPlatform(int platformTypeNumber);
+	MyPlatform();
 	~MyPlatform();
 
+	void initPlatformProperties(int platformType);
 	bool loadTexture(SDL_Renderer* renderer);
 	bool checkIfUnicornLandedOnPlatform(SDL_Rect* unicornCollider);
 	bool checkIfUnicornCrashedIntoPlatform(SDL_Rect* unicornCollider);
 	void render(SDL_Renderer* renderer, int scrollingOffsetVel, int scrollingYOffsetVel);
+	void restartPlatform();
 	SDL_Rect* getCollider(int colliderNum);
 
 private:

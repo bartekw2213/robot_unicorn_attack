@@ -3,12 +3,27 @@
 #include <string.h>
 #include "MyPlatform.h"
 
-MyPlatform::MyPlatform(int platformTypeNumber) {
+MyPlatform::MyPlatform() {
+	mPlatformTypeNumber = 0;
+	mPlatformWidth = 0; 
+	mPlatformHeight = 0;
+	mMinPlatformY = 0; 
+	mMaxPlatformY = 0;
+	mPlatfromCollidersNum = 0;
+	mPosX = 0;
+	mPosY = 0;
+}
+
+MyPlatform::~MyPlatform() {
+	mMyPlatformTexture.free();
+}
+
+void MyPlatform::initPlatformProperties(int platformTypeNumber) {
 	mPlatformTypeNumber = platformTypeNumber;
 
 	switch (mPlatformTypeNumber) {
-	case 1: 
-		mPlatformWidth = PLATFORM1_WIDTH; mPlatformHeight = PLATFORM1_HEIGHT; 
+	case 1:
+		mPlatformWidth = PLATFORM1_WIDTH; mPlatformHeight = PLATFORM1_HEIGHT;
 		mMinPlatformY = MIN_PLATFORM1_Y; mMaxPlatformY = MAX_PLATFORM1_Y;
 		mPlatfromCollidersNum = PLATFORM1_COLLIDERS_NUM;
 		mPosX = 0;
@@ -34,10 +49,6 @@ MyPlatform::MyPlatform(int platformTypeNumber) {
 	}
 
 	mPosY = generatePlatformY();
-}
-
-MyPlatform::~MyPlatform() {
-	mMyPlatformTexture.free();
 }
 
 bool MyPlatform::loadTexture(SDL_Renderer* renderer) {
@@ -194,3 +205,22 @@ bool MyPlatform::checkIfUnicornCrashedIntoPlatform(SDL_Rect* unicornCollider) {
 
 	return false;
 };
+
+void MyPlatform::restartPlatform() {
+	switch (mPlatformTypeNumber) {
+	case 1:
+		mPosX = 0;
+		break;
+	case 2:
+		mPosX = PLATFORM1_WIDTH + DISTANCE_BETWEEN_PLATFORMS;
+		break;
+	case 3:
+		mPosX = PLATFORM1_WIDTH + PLATFORM2_WIDTH + 2 * DISTANCE_BETWEEN_PLATFORMS;
+		break;
+	case 4:
+		mPosX = PLATFORM1_WIDTH + DISTANCE_BETWEEN_PLATFORMS;
+		break;
+	}
+
+	mPosY = generatePlatformY();
+}

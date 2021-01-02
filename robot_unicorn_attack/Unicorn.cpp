@@ -10,6 +10,7 @@ Unicorn::Unicorn() {
 	mTimeWhenUnicornJumped = 0;
 	mTimeWhenFreeFallStarted = 0;
 	mTimeWhenUnicornDashed = 0;
+	mDoesUnicornExploded = false;
 	mIsUnicornDashing = false;
 	mIsPlayerHoldingJumpKey = false;
 	mIsUnicornFreeFallingAfterDash = false;
@@ -24,7 +25,11 @@ Unicorn::~Unicorn() {
 };
 
 void Unicorn::render(SDL_Renderer* renderer, int scrollingYOffsetVel) {
-	if (mIsUnicornDashing) {
+	if (mDoesUnicornExploded) {
+		int frameToDraw = (SDL_GetTicks() - mTimeWhenUnicornExploded) / (float)UNICORN_EXPLOSION_TIME * (UNICORN_EXPLOSION_TEXTURES_NUM - 1);
+		mUnicornExplosionTextures[frameToDraw].resizeAndRender(mPosX, mPosY, UNICORN_WIDTH, UNICORN_HEIGHT, renderer);
+	}
+	else if (mIsUnicornDashing) {
 		int frameToDraw = (SDL_GetTicks() - mTimeWhenUnicornDashed) / (float)UNICORN_DASH_TIME * (UNICORN_DASHING_TEXTURES_NUM - 1);
 		mUnicornDashingTextures[frameToDraw].resizeAndRender(mPosX, mPosY, UNICORN_WIDTH * UNICORN_TEXTURES_DASH_TO_RUN_SIZE_RATIO, UNICORN_HEIGHT * UNICORN_TEXTURES_DASH_TO_RUN_SIZE_RATIO, renderer);
 	}
@@ -61,6 +66,9 @@ bool Unicorn::loadTextures(SDL_Renderer* renderer) {
 		return false;
 
 	if (!mLoadUnicornAnimationFrames(UNICORN_JUMPING_TEXTURES_NUM, "../images/unicorn_jump/", mUnicornJumpingTextures, renderer))
+		return false;
+
+	if (!mLoadUnicornAnimationFrames(UNICORN_EXPLOSION_TEXTURES_NUM, "../images/unicorn_explosion/", mUnicornExplosionTextures, renderer))
 		return false;
 
 	return true;
@@ -109,6 +117,9 @@ void Unicorn::manipulateUnicornOnYAxis(bool unicornLandedOnPlatform, int* scroll
 };
 
 void Unicorn::jump(bool isPlayerHoldingJumpKey) {
+	if (mDoesUnicornExploded)
+		return;
+
 	mIsPlayerHoldingJumpKey = isPlayerHoldingJumpKey;
 	if (mHowManyTimesUnicornJumped < 2 && isPlayerHoldingJumpKey && !mIsUnicornDashing) {
 		++mHowManyTimesUnicornJumped;
@@ -133,9 +144,22 @@ void Unicorn::dash(bool isPlayerHoldingDash) {
 	}
 };
 
+void Unicorn::explode() {
+	mTimeWhenUnicornExploded = SDL_GetTicks();
+	mDoesUnicornExploded = true;
+}
+
 bool Unicorn::getIsUnicornDashing() {
 	return mIsUnicornDashing;
 };
+
+bool Unicorn::getDoesUnicornExploded() {
+	return mDoesUnicornExploded;
+}
+
+bool Unicorn::hasExplosionEnded() {
+	return SDL_GetTicks() - mTimeWhenUnicornExploded >= UNICORN_EXPLOSION_TIME;
+}
 
 SDL_Rect* Unicorn::getCollider() {
 		return &mCollider;
@@ -148,7 +172,7 @@ bool Unicorn::mLoadUnicornAnimationFrames(int numOfFrames, char const* pathToFol
 		strncat(path, pathToFolderWithFrames, strlen(pathToFolderWithFrames));
 
 		// dodanie do sciezki nazwe wczytywanego pliku (nazwa zdjec danej animacji jednorozca to liczby 1.png, 2.png, 3.png, ...)
-		char a[MAX_UNICORNE_TEXTURE_FILE_LENGTH];
+		char a[MAX_TEXTURE_FILE_LENGTH];
 		_itoa(i, a, 10);
 		strncat(path, a, strlen(a));
 		strncat(path, ".png", strlen(".png"));
@@ -161,3 +185,16 @@ bool Unicorn::mLoadUnicornAnimationFrames(int numOfFrames, char const* pathToFol
 
 	return true;
 };
+
+void Unicorn::restartUnicorn() {
+	mPosX = 0;
+	mPosY = SCREEN_HEIGHT / 3;
+	mHowManyTimesUnicornJumped = 0;
+	mTimeWhenUnicornJumped = 0;
+	mTimeWhenFreeFallStarted = 0;
+	mTimeWhenUnicornDashed = 0;
+	mDoesUnicornExploded = false;
+	mIsUnicornDashing = false;
+	mIsPlayerHoldingJumpKey = false;
+	mIsUnicornFreeFallingAfterDash = false;
+}
