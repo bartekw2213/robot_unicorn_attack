@@ -143,7 +143,7 @@ void Unicorn::dash(bool isPlayerHoldingDash) {
 	}
 
 	// pozwol na wykonanie zrywu jesli poprzedni byl wystarczajaco czasu temu
-	if (SDL_GetTicks() - mTimeWhenUnicornDashed > UNICORN_TIME_BETWEEN_DASHES && isPlayerHoldingDash) {
+	if (SDL_GetTicks() - mTimeWhenUnicornDashed > UNICORN_MIN_TIME_BETWEEN_DASHES && isPlayerHoldingDash) {
 		mIsUnicornDashing = true;
 		mTimeWhenUnicornDashed = SDL_GetTicks();
 		if (mHowManyTimesUnicornJumped == 2)
