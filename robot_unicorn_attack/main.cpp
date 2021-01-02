@@ -273,8 +273,8 @@ void handleGameplay(SDL_Event* e, SDL_Renderer* renderer, bool* closeProgram, Un
 			unicornObject->fellOver();
 
 		if (unicornObject->getDoesUnicornExploded()) {
-			scrollingOffsetVel = 1;
-			scrollingYOffsetVel = -1;
+			scrollingOffsetVel = 0;
+			scrollingYOffsetVel = 0;
 
 			if (unicornObject->hasExplosionEnded())
 				quit = true;
@@ -316,7 +316,7 @@ void handleEndScreen(SDL_Event* e, SDL_Renderer* renderer, bool* closeProgram, T
 }
 
 void restartGame(Unicorn* unicornObject, MyPlatform platforms[PLATFORM_TYPES]) {
-	unicornObject->restartUnicorn();
+	unicornObject->initUnicornValues();
 
 	for (int i = 0; i < PLATFORM_TYPES; i++)
 		platforms[i].restartPlatform();
@@ -369,8 +369,8 @@ int main()
 				if (closeProgram)
 					break;
 
-				handleEndScreen(&e, renderer, &closeProgram, &endScreenTexture, &subtitlesTextures[AGAIN_SUBTITLE_INDEX]);
 				restartGame(&unicornObject, platforms);
+				handleEndScreen(&e, renderer, &closeProgram, &endScreenTexture, &subtitlesTextures[AGAIN_SUBTITLE_INDEX]);
 
 				if (closeProgram)
 					break;

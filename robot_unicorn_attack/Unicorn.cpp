@@ -4,22 +4,7 @@
 #include "Unicorn.h"
 
 Unicorn::Unicorn() {
-	mPosX = 0;
-	mPosY = SCREEN_HEIGHT / 3;
-	mHowManyTimesUnicornJumped = 0;
-	mTimeWhenUnicornJumped = 0;
-	mTimeWhenFreeFallStarted = 0;
-	mTimeWhenUnicornExploded = 0;
-	mTimeWhenUnicornFellOver = 0;
-	mTimeWhenUnicornDashed = 0;
-	mDoesUnicornExploded = false;
-	mDoesUnicornFellOver = false;
-	mIsUnicornDashing = false;
-	mIsPlayerHoldingJumpKey = false;
-	mIsUnicornFreeFallingAfterDash = false;
-	mCollider.w = UNICORN_WIDTH / 2;
-	mCollider.h = UNICORN_HEIGHT * 3 / 4;
-	shiftCollider();
+	initUnicornValues();
 };
 
 Unicorn::~Unicorn() {
@@ -152,6 +137,9 @@ void Unicorn::dash(bool isPlayerHoldingDash) {
 };
 
 void Unicorn::explode() {
+	if (mDoesUnicornExploded)
+		return;
+
 	mTimeWhenUnicornExploded = SDL_GetTicks();
 	mDoesUnicornExploded = true;
 }
@@ -208,7 +196,7 @@ bool Unicorn::mLoadUnicornAnimationFrames(int numOfFrames, char const* pathToFol
 	return true;
 };
 
-void Unicorn::restartUnicorn() {
+void Unicorn::initUnicornValues() {
 	mPosX = 0;
 	mPosY = SCREEN_HEIGHT / 3;
 	mHowManyTimesUnicornJumped = 0;
@@ -222,4 +210,7 @@ void Unicorn::restartUnicorn() {
 	mIsUnicornDashing = false;
 	mIsPlayerHoldingJumpKey = false;
 	mIsUnicornFreeFallingAfterDash = false;
+	mCollider.w = UNICORN_WIDTH / 2;
+	mCollider.h = UNICORN_HEIGHT * 3 / 4;
+	shiftCollider();
 }

@@ -223,6 +223,7 @@ void MyPlatform::restartPlatform() {
 	}
 
 	mPosY = generatePlatformY();
+	shiftColliders();
 }
 
 int MyPlatform::getPosY() {

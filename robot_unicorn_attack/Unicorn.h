@@ -13,7 +13,6 @@ public:
 	void shiftCollider();
 	bool loadTextures(SDL_Renderer* renderer);
 	void manipulateUnicornOnYAxis(bool unicornLandedOnPlatform, int* scrollingYOffset);
-	void restartUnicorn();
 	void jump(bool isPlayerHoldingJumpKey);
 	void dash(bool isPlayerHoldingDash);
 	void explode();
@@ -23,6 +22,7 @@ public:
 	bool hasExplosionEnded();
 	bool hasFallingOverEnded();
 	SDL_Rect* getCollider();
+	void initUnicornValues();
 
 private:
 	bool mIsPlayerHoldingJumpKey, mIsUnicornDashing, mIsUnicornFreeFallingAfterDash, mDoesUnicornExploded, mDoesUnicornFellOver;

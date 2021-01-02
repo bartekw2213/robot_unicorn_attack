@@ -1,19 +1,10 @@
-﻿  MyPlatform.cpp
+﻿  Unicorn.cpp
 C:\Users\barte\source\repos\robot_unicorn_attack\robot_unicorn_attack\Texture.h(3,10): warning C4067: nieoczekiwane tokeny występujące po dyrektywie preprocesora - oczekiwano nowego wiersza
-C:\Users\barte\source\repos\robot_unicorn_attack\robot_unicorn_attack\MyPlatform.cpp(118,36): warning C4244: "=": konwersja z "double" do "int", możliwa utrata danych
-C:\Users\barte\source\repos\robot_unicorn_attack\robot_unicorn_attack\MyPlatform.cpp(120,36): warning C4244: "=": konwersja z "double" do "int", możliwa utrata danych
-C:\Users\barte\source\repos\robot_unicorn_attack\robot_unicorn_attack\MyPlatform.cpp(126,36): warning C4244: "=": konwersja z "double" do "int", możliwa utrata danych
-C:\Users\barte\source\repos\robot_unicorn_attack\robot_unicorn_attack\MyPlatform.cpp(154,44): warning C4244: "=": konwersja z "double" do "int", możliwa utrata danych
-C:\Users\barte\source\repos\robot_unicorn_attack\robot_unicorn_attack\MyPlatform.cpp(156,44): warning C4244: "=": konwersja z "double" do "int", możliwa utrata danych
-  Texture.cpp
-C:\Users\barte\source\repos\robot_unicorn_attack\robot_unicorn_attack\Texture.h(3,10): warning C4067: nieoczekiwane tokeny występujące po dyrektywie preprocesora - oczekiwano nowego wiersza
-  Unicorn.cpp
-C:\Users\barte\source\repos\robot_unicorn_attack\robot_unicorn_attack\Texture.h(3,10): warning C4067: nieoczekiwane tokeny występujące po dyrektywie preprocesora - oczekiwano nowego wiersza
-C:\Users\barte\source\repos\robot_unicorn_attack\robot_unicorn_attack\Unicorn.cpp(32,19): warning C4244: "inicjowanie": konwersja z "float" do "int", możliwa utrata danych
-C:\Users\barte\source\repos\robot_unicorn_attack\robot_unicorn_attack\Unicorn.cpp(36,19): warning C4244: "inicjowanie": konwersja z "float" do "int", możliwa utrata danych
-C:\Users\barte\source\repos\robot_unicorn_attack\robot_unicorn_attack\Unicorn.cpp(37,142): warning C4244: "argument": konwersja z "double" do "int", możliwa utrata danych
-C:\Users\barte\source\repos\robot_unicorn_attack\robot_unicorn_attack\Unicorn.cpp(37,84): warning C4244: "argument": konwersja z "double" do "int", możliwa utrata danych
-C:\Users\barte\source\repos\robot_unicorn_attack\robot_unicorn_attack\Unicorn.cpp(62,23): warning C4244: "=": konwersja z "double" do "int", możliwa utrata danych
+C:\Users\barte\source\repos\robot_unicorn_attack\robot_unicorn_attack\Unicorn.cpp(17,19): warning C4244: "inicjowanie": konwersja z "float" do "int", możliwa utrata danych
+C:\Users\barte\source\repos\robot_unicorn_attack\robot_unicorn_attack\Unicorn.cpp(21,19): warning C4244: "inicjowanie": konwersja z "float" do "int", możliwa utrata danych
+C:\Users\barte\source\repos\robot_unicorn_attack\robot_unicorn_attack\Unicorn.cpp(22,142): warning C4244: "argument": konwersja z "double" do "int", możliwa utrata danych
+C:\Users\barte\source\repos\robot_unicorn_attack\robot_unicorn_attack\Unicorn.cpp(22,84): warning C4244: "argument": konwersja z "double" do "int", możliwa utrata danych
+C:\Users\barte\source\repos\robot_unicorn_attack\robot_unicorn_attack\Unicorn.cpp(47,23): warning C4244: "=": konwersja z "double" do "int", możliwa utrata danych
   main.cpp
 C:\Users\barte\source\repos\robot_unicorn_attack\robot_unicorn_attack\Texture.h(3,10): warning C4067: nieoczekiwane tokeny występujące po dyrektywie preprocesora - oczekiwano nowego wiersza
 C:\Users\barte\source\repos\robot_unicorn_attack\robot_unicorn_attack\main.cpp(340,12): warning C4244: "argument": konwersja z "time_t" do "unsigned int", możliwa utrata danych
