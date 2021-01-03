@@ -48,6 +48,18 @@ bool loadWishesLeftIconsTextures(Texture wishesLeftIconsTextures[UNICORN_WISHES_
 	return true;
 }
 
+bool loadStartingScreen(Texture* startingScreenTexture, SDL_Renderer* renderer) {
+	if (!loadTextureByPath("../images/starting_screen.png", startingScreenTexture, renderer))
+		return false;
+
+	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+	SDL_RenderClear(renderer);
+	startingScreenTexture->resizeAndRender(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, renderer);
+	SDL_RenderPresent(renderer);
+
+	return true;
+}
+
 bool loadMedia(Texture* bgTexture, Texture* endScreenTexture, Texture* digitsTexture, Unicorn* unicornObject, MyPlatform platforms[PLATFORM_TYPES], 
 	Texture wishesLeftIconsTextures[UNICORN_WISHES_NUM], Texture subtitlesTextures[SUBTITLES_TEXTURES_NUM], SDL_Renderer* renderer) {
 
@@ -64,52 +76,48 @@ bool loadMedia(Texture* bgTexture, Texture* endScreenTexture, Texture* digitsTex
 	return true;
 }
 
-bool init(SDL_Window** window, SDL_Renderer** renderer) {
-	bool success = true;
-
+bool initSDL() {
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
 		printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
-		success = false;
-	}
-	else {
-		*window = SDL_CreateWindow("Robot Unicorn Attack", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
-
-		if (*window == NULL) {
-			printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
-			success = false;
-		}
-		else {
-			*renderer = SDL_CreateRenderer(*window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-			if (*renderer == NULL) {
-				printf("Renderer could not be created! SDL Error: %s\n", SDL_GetError());
-				success = false;
-			}
-			else {
-				int imgFlags = IMG_INIT_PNG;
-				if (!(IMG_Init(imgFlags) & imgFlags)) {
-					printf("SDL_image could not initialize! SDL_image Error: %s\n", IMG_GetError());
-					success = false;
-				}
-			}
-		}
-	}
-
-	return success;
-}
-
-bool loadStartingScreen(Texture* startingScreenTexture, SDL_Renderer* renderer) {
-	char startingScreenTexturePath[MAX_PATH_LENGTH] = "../images/starting_screen.png";
-	if (!(*startingScreenTexture).loadFromFile(startingScreenTexturePath, renderer)) {
-		printf("Failed to load starting screen texture image!\n");
 		return false;
 	};
 
-	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
-	SDL_RenderClear(renderer);
+	return true;
+}
 
-	(*startingScreenTexture).resizeAndRender(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, renderer);
-	SDL_RenderPresent(renderer);
+bool initSDL_Image() {
+	int imgFlags = IMG_INIT_PNG;
+	if (!(IMG_Init(imgFlags) & imgFlags)) {
+		printf("SDL_image could not initialize! SDL_image Error: %s\n", IMG_GetError());
+		return false;
+	};
+}
 
+bool createSDLWindow(SDL_Window** window) {
+	*window = SDL_CreateWindow("Robot Unicorn Attack", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+	if (*window == NULL) {
+		printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
+		return false;
+	};
+
+	return true;
+}
+
+bool createSDLRenderer(SDL_Window** window, SDL_Renderer** renderer) {
+	*renderer = SDL_CreateRenderer(*window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+	if (*renderer == NULL) {
+		printf("Renderer could not be created! SDL Error: %s\n", SDL_GetError());
+		return false;
+	};
+
+	return true;
+}
+
+bool init(SDL_Window** window, SDL_Renderer** renderer) {
+
+	if (!initSDL() || !initSDL_Image() || !createSDLWindow(window) || !createSDLRenderer(window, renderer))
+		return false;
+		
 	return true;
 }
 
