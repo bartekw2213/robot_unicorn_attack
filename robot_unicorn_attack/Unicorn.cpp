@@ -124,6 +124,8 @@ void Unicorn::dash(bool isPlayerHoldingDash) {
 	// gdy gracz przestanie trzymacz przycisk X przestan wykonywac zryw
 	if (!isPlayerHoldingDash) {
 		mIsUnicornDashing = false;
+		mIsUnicornFreeFallingAfterDash = true;
+		mTimeWhenFreeFallStarted = SDL_GetTicks();
 		return;
 	}
 

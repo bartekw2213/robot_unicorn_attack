@@ -12,6 +12,7 @@ public:
 	void free();
 	void render(int x, int y, SDL_Renderer* renderer);
 	void resizeAndRender(int x, int y, int width, int height, SDL_Renderer* renderer);
+	void renderClipped(int x, int y, SDL_Rect* clip, SDL_Renderer* renderer);
 	int getWidth();
 	int getHeight();
 

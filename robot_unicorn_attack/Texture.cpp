@@ -56,6 +56,17 @@ void Texture::resizeAndRender(int x, int y, int width, int height, SDL_Renderer*
 	SDL_RenderCopy(renderer, mTexture, NULL, &renderQuad);
 };
 
+void Texture::renderClipped(int x, int y, SDL_Rect* clip, SDL_Renderer* renderer) {
+	if (clip->h == 0)
+		clip->h = mHeight;
+
+	if (clip->w == 0)
+		clip->h = mWidth;
+
+	SDL_Rect renderQuad = { x, y, clip->w, clip->h };
+	SDL_RenderCopy(renderer, mTexture, clip, &renderQuad);
+}
+
 int Texture::getWidth() {
 	return mWidth;
 };

@@ -32,6 +32,8 @@
 #define UNICORN_WISHES_NUM 3							// ilosc "zyc"
 #define GRAVITATION_FACTOR 25							// wspolczynnik grawitacji - im bedzie mniejszy tym grawitacja bedzie silniejsza
 #define JUMP_TIME_OFFSET 50								// czas po ktorym jest nasluchiwane czy jednorozec dotknal ziemi po wyskoczeniu
+#define NUM_OF_SIGNS_IN_DIGIT_TEXTURE 11				// ilosc znakow znajdujacych sie w teksturze cyfr
+#define TIME_DIGITS	6									// ile cyfr bedzie wyswietlac timer
 
 // === Sta³e dotycz¹ce œcie¿ek plików ===
 #define MAX_PATH_LENGTH 250								// maksymalna dlugosc sciezki pliku

@@ -11,7 +11,7 @@
 #include "Unicorn.h"
 #include "MyPlatform.h"
 
-bool loadMedia(Texture* bgTexture, Texture* endScreenTexture, Unicorn* unicornObject, MyPlatform platforms[PLATFORM_TYPES], 
+bool loadMedia(Texture* bgTexture, Texture* endScreenTexture, Texture* digitsTexture, Unicorn* unicornObject, MyPlatform platforms[PLATFORM_TYPES], 
 	Texture wishesLeftIconsTextures[UNICORN_WISHES_NUM], Texture subtitlesTextures[SUBTITLES_TEXTURES_NUM], SDL_Renderer* renderer) {
 
 	char bgTexturePath[MAX_PATH_LENGTH] = "../images/background.png";
@@ -35,6 +35,12 @@ bool loadMedia(Texture* bgTexture, Texture* endScreenTexture, Unicorn* unicornOb
 	char againSubtitlePath[MAX_PATH_LENGTH] = "../images/subtitles/again_subtitle.png";
 	if (!subtitlesTextures[AGAIN_SUBTITLE_INDEX].loadFromFile(againSubtitlePath, renderer)) {
 		printf("Failed to load again subtitle texture image!\n");
+		return false;
+	};
+
+	char digitsTexturePath[MAX_PATH_LENGTH] = "../images/digits.png";
+	if (!digitsTexture->loadFromFile(digitsTexturePath, renderer)) {
+		printf("Failed to load digits texture image!\n");
 		return false;
 	};
 
@@ -229,8 +235,31 @@ void close(SDL_Window* window, SDL_Renderer* renderer) {
 	SDL_Quit();
 }
 
-void renderTextures(SDL_Renderer* renderer, Texture* bgTexture, Unicorn* unicornObject, MyPlatform platforms[PLATFORM_TYPES], Texture wishesLeftIconsTextures[UNICORN_WISHES_NUM],
-	int scrollingOffsetVel, int scrollingYOffsetVel) {
+void renderDigit(int digitNum, int digit, int oneDigitWidth, Texture* digitsTexture, SDL_Renderer* renderer) {
+	int marginTop = oneDigitWidth, marginLeft = oneDigitWidth * 2;
+	SDL_Rect clip = { oneDigitWidth * digit, 0, oneDigitWidth, 0 };
+
+	digitsTexture->renderClipped(digitNum * oneDigitWidth + marginLeft, marginTop, &clip, renderer);
+}
+
+void renderTime(Texture* digitsTexture, Uint32 currentTime, SDL_Renderer* renderer) {
+	int oneDigitWidth = digitsTexture->getWidth() / NUM_OF_SIGNS_IN_DIGIT_TEXTURE;
+	int timeDigits[TIME_DIGITS] = { 0 };
+
+	timeDigits[0] = currentTime / 100000;				// reprezentuje setki obecnego czasu
+	timeDigits[1] = currentTime / 10000;				// reprezentuje dziesietne obecnego czasu
+	timeDigits[2] = currentTime / 1000 % 10;			// reprezentuje jednosci obecnego czasu
+	timeDigits[3] = NUM_OF_SIGNS_IN_DIGIT_TEXTURE - 1;	// reprezentuje kropke oddzielajaca sekundy od minisekund
+	timeDigits[4] = (currentTime % 1000) / 100;			// reprezentuje czesci setne milisekund
+	timeDigits[5] = (currentTime % 100) / 10;			// reprezentuje czesci dziesietne milisekund
+
+	
+	for (int i = 0; i < TIME_DIGITS; i++)
+		renderDigit(i, timeDigits[i], oneDigitWidth, digitsTexture, renderer);
+}
+
+void renderTextures(SDL_Renderer* renderer, Texture* bgTexture, Texture* digitsTexture, Unicorn* unicornObject, MyPlatform platforms[PLATFORM_TYPES], 
+	Texture wishesLeftIconsTextures[UNICORN_WISHES_NUM], Uint32 currentTime, int scrollingOffsetVel, int scrollingYOffsetVel) {
 
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
 	SDL_RenderClear(renderer);
@@ -242,12 +271,13 @@ void renderTextures(SDL_Renderer* renderer, Texture* bgTexture, Unicorn* unicorn
 
 	unicornObject->render(renderer, scrollingYOffsetVel);
 	wishesLeftIconsTextures->render(SCREEN_WIDTH - wishesLeftIconsTextures->getWidth(), 0, renderer);
+	renderTime(digitsTexture, currentTime, renderer);
 
 	SDL_RenderPresent(renderer);
 }
 
 void handleGameplay(SDL_Event* e, SDL_Renderer* renderer, bool* closeProgram, Unicorn* unicornObject, MyPlatform platforms[PLATFORM_TYPES], 
-	Texture* bgTexture, Texture* wishesLeftIconsTextures) {
+	Texture* bgTexture, Texture* digitTexture, Texture* wishesLeftIconsTextures) {
 
 	bool quit = false, gameDefaultControlsEnabled = true;
 	int scrollingOffsetVel = 0, scrollingYOffsetVel = 0;
@@ -284,7 +314,7 @@ void handleGameplay(SDL_Event* e, SDL_Renderer* renderer, bool* closeProgram, Un
 			quit = true;
 
 		unicornObject->manipulateUnicornOnYAxis(checkIfUnicornLandedOnPlatform(unicornObject, platforms), &scrollingYOffsetVel);
-		renderTextures(renderer, bgTexture, unicornObject, platforms, wishesLeftIconsTextures, scrollingOffsetVel, scrollingYOffsetVel);
+		renderTextures(renderer, bgTexture, digitTexture, unicornObject, platforms, wishesLeftIconsTextures, currentTime, scrollingOffsetVel, scrollingYOffsetVel);
 	}
 }
 
@@ -328,7 +358,7 @@ int main()
 	SDL_Window* window = NULL;
 	SDL_Renderer* renderer = NULL;
 	SDL_Event e;
-	Texture bgTexture, startingScreenTexture, endScreenTexture, wishesLeftIconsTextures[UNICORN_WISHES_NUM];
+	Texture bgTexture, startingScreenTexture, endScreenTexture, digitsTexture, wishesLeftIconsTextures[UNICORN_WISHES_NUM];
 	Texture subtitlesTextures[SUBTITLES_TEXTURES_NUM];
 	Unicorn unicornObject;
 	MyPlatform platforms[PLATFORM_TYPES];
@@ -337,7 +367,7 @@ int main()
 		platforms[i].initPlatformProperties(i + 1);
 
 	bool closeProgram = false;
-	srand(time(0));									//	przy pomocy rand() bede generowac losowo gdzie ma pojawic sie przeszkoda lub platforma
+	srand(time(0));									
 
 
 	if (!init(&window, &renderer))
@@ -349,7 +379,7 @@ int main()
 			return 0;
 		}
 
-		if (!loadMedia(&bgTexture, &endScreenTexture, &unicornObject, platforms, wishesLeftIconsTextures, subtitlesTextures, renderer)) {
+		if (!loadMedia(&bgTexture, &endScreenTexture, &digitsTexture, &unicornObject, platforms, wishesLeftIconsTextures, subtitlesTextures, renderer)) {
 			printf("Failed to load media\n");
 			close(window, renderer);
 			return 0;
@@ -364,7 +394,7 @@ int main()
 				break;
 				
 			while (wishes > 0) {
-				handleGameplay(&e, renderer, &closeProgram, &unicornObject, platforms, &bgTexture, &wishesLeftIconsTextures[wishes - 1]);
+				handleGameplay(&e, renderer, &closeProgram, &unicornObject, platforms, &bgTexture, &digitsTexture, &wishesLeftIconsTextures[wishes - 1]);
 
 				if (closeProgram)
 					break;
