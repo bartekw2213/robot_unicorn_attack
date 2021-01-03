@@ -11,64 +11,55 @@
 #include "Unicorn.h"
 #include "MyPlatform.h"
 
-bool loadMedia(Texture* bgTexture, Texture* endScreenTexture, Texture* digitsTexture, Unicorn* unicornObject, MyPlatform platforms[PLATFORM_TYPES], 
-	Texture wishesLeftIconsTextures[UNICORN_WISHES_NUM], Texture subtitlesTextures[SUBTITLES_TEXTURES_NUM], SDL_Renderer* renderer) {
+bool loadTextureByPath(const char* path, Texture* dest, SDL_Renderer* renderer) {
+	char pathToFile[MAX_PATH_LENGTH] = "";
+	strncpy(pathToFile, path, strlen(path));
 
-	char bgTexturePath[MAX_PATH_LENGTH] = "../images/background.png";
-	if (!bgTexture->loadFromFile(bgTexturePath, renderer)) {
-		printf("Failed to load background' texture image!\n");
+	if (!dest->loadFromFile(pathToFile, renderer)) {
+		printf("Failed to load %s texture image!\n", path);
 		return false;
 	};
 
-	char endScreenTexturePath[MAX_PATH_LENGTH] = "../images/end_screen.png";
-	if (!endScreenTexture->loadFromFile(endScreenTexturePath, renderer)) {
-		printf("Failed to load end screen texture image!\n");
-		return false;
-	};
+	return true;
+}
 
-	char startSubtitlePath[MAX_PATH_LENGTH] = "../images/subtitles/start_subtitle.png";
-	if (!subtitlesTextures[START_SUBTITLE_INDEX].loadFromFile(startSubtitlePath, renderer)) {
-		printf("Failed to load start subtitle texture image!\n");
-		return false;
-	};
-
-	char againSubtitlePath[MAX_PATH_LENGTH] = "../images/subtitles/again_subtitle.png";
-	if (!subtitlesTextures[AGAIN_SUBTITLE_INDEX].loadFromFile(againSubtitlePath, renderer)) {
-		printf("Failed to load again subtitle texture image!\n");
-		return false;
-	};
-
-	char digitsTexturePath[MAX_PATH_LENGTH] = "../images/digits.png";
-	if (!digitsTexture->loadFromFile(digitsTexturePath, renderer)) {
-		printf("Failed to load digits texture image!\n");
-		return false;
-	};
-
-	for (int i = 0; i < PLATFORM_TYPES; i++) {
+bool loadPlatformsTextures(MyPlatform platforms[PLATFORM_TYPES], SDL_Renderer* renderer) {
+	for (int i = 0; i < PLATFORM_TYPES; i++)
 		if (!platforms[i].loadTexture(renderer)) {
 			printf("Failed to load %i platform texture image\n", (i + 1));
 			return false;
 		}
-	}
 
+	return true;
+}
+
+bool loadWishesLeftIconsTextures(Texture wishesLeftIconsTextures[UNICORN_WISHES_NUM], SDL_Renderer* renderer) {
 	for (int i = 1; i <= UNICORN_WISHES_NUM; i++) {
 		char path[MAX_PATH_LENGTH] = "../images/wishes_left_icons/";
-
-		char a[MAX_TEXTURE_FILE_LENGTH];
-		_itoa(i, a, 10);
-		strncat(path, a, strlen(a));
+		char fileName[MAX_TEXTURE_FILE_LENGTH];
+		_itoa(i, fileName, 10);
+		strncat(path, fileName, strlen(fileName));
 		strncat(path, ".png", strlen(".png"));
 
-		if (!wishesLeftIconsTextures[i - 1].loadFromFile(path, renderer)) {
-			printf("Failed to load unicorn left icons texture images!\n");
+		if (!loadTextureByPath(path, &wishesLeftIconsTextures[i - 1], renderer))
 			return false;
-		}
 	}
 
-	if (!unicornObject->loadTextures(renderer)) {
-		printf("Failed to load unicorn texture images\n");
+	return true;
+}
+
+bool loadMedia(Texture* bgTexture, Texture* endScreenTexture, Texture* digitsTexture, Unicorn* unicornObject, MyPlatform platforms[PLATFORM_TYPES], 
+	Texture wishesLeftIconsTextures[UNICORN_WISHES_NUM], Texture subtitlesTextures[SUBTITLES_TEXTURES_NUM], SDL_Renderer* renderer) {
+
+	if (
+		!loadTextureByPath("../images/background.png", bgTexture, renderer) || !loadTextureByPath("../images/end_screen.png", endScreenTexture, renderer) || 
+		!loadTextureByPath("../images/digits.png", digitsTexture, renderer) || !loadTextureByPath("../images/subtitles/again_subtitle.png", &subtitlesTextures[AGAIN_SUBTITLE_INDEX], renderer) ||
+		!loadTextureByPath("../images/subtitles/start_subtitle.png", &subtitlesTextures[START_SUBTITLE_INDEX], renderer)
+		)
 		return false;
-	}
+
+	if (!loadPlatformsTextures(platforms, renderer) || !loadWishesLeftIconsTextures(wishesLeftIconsTextures, renderer) || !unicornObject->loadTextures(renderer))
+		return false;
 
 	return true;
 }

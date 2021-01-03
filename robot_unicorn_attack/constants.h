@@ -49,7 +49,7 @@
 #define PLATFORM_TYPES 4								// ilosc typow platfrom jakie moga wystapic w rozgrywce
 #define DISTANCE_BETWEEN_PLATFORMS 500					// dystans pomiedzy platformami
 #define PLATFORMS_Y_WHEN_FELL_OVER_IS_DETECTED -1000	// gdy jednorozec jest w odleglosci 1000 na osi Y od najblizszej platformy - gra jest konczona
-#define PLATFORMS_Y_COLLISION_OFFSET 20					// granica na osi Y na jakiej ci¹gle wykrywana jest ewentualna kolizja jednoro¿ca z obiektem
+#define PLATFORMS_Y_COLLISION_OFFSET 30					// granica na osi Y na jakiej ci¹gle wykrywana jest ewentualna kolizja jednoro¿ca z obiektem
 #define MAX_COLLIDERS 3									// maksymalna ilosc prostokatow wykrywajacych kolizje
 
 // Platform 1
