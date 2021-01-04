@@ -11,6 +11,7 @@
 #include "Unicorn.h"
 #include "MyPlatform.h"
 
+// === Funkcje odpowiadajace za wczytywanie tekstur ===
 bool loadTextureByPath(const char* path, Texture* dest, SDL_Renderer* renderer) {
 	char pathToFile[MAX_PATH_LENGTH] = "";
 	strncpy(pathToFile, path, strlen(path));
@@ -76,6 +77,7 @@ bool loadMedia(Texture* bgTexture, Texture* endScreenTexture, Texture* digitsTex
 	return true;
 }
 
+// === Funkcje odpowiadajace za inicjalizacje SDL, SDL_image, stworzenie Window i Renderer ===
 bool initSDL() {
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
 		printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
@@ -121,84 +123,38 @@ bool init(SDL_Window** window, SDL_Renderer** renderer) {
 	return true;
 }
 
-void handleMainMenu(SDL_Event* e, SDL_Renderer* renderer, Texture* startingScreenTexture, Texture* startGameSubtitle, bool* closeProgram) {
-	bool quit = false;
-	
-	while (!quit) {
-
-		while (SDL_PollEvent(e) != 0) {
-			if ((*e).type == SDL_QUIT) {
-				quit = true;
-				*closeProgram = true;
-			}
-			else if ((*e).type == SDL_KEYDOWN && (*e).key.repeat == 0) {
-				switch ((*e).key.keysym.sym) {
-				case SDLK_z: quit = true; break;
-				case SDLK_ESCAPE: quit = true; *closeProgram = true; break;
-				}
-			}
-		}
-
-		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
-		SDL_RenderClear(renderer);
-		startingScreenTexture->resizeAndRender(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, renderer);
-		startGameSubtitle->render(SCREEN_WIDTH / 2 - startGameSubtitle->getWidth() / 2, SCREEN_HEIGHT - startGameSubtitle->getHeight(), renderer);
-		SDL_RenderPresent(renderer);
-	}
-}
-
-void projectDefaultControls(SDL_Event* e, Unicorn* unicornObject, bool* quit, bool* closeProgram, int* scrollingOffsetVel, bool* gameDefaultControlsEnabled) {
-	if ((*e).type == SDL_QUIT) {
-		*quit = true;
-		*closeProgram = true;
-	}
-	else if ((*e).type == SDL_KEYDOWN && (*e).key.repeat == 0) {
-		switch ((*e).key.keysym.sym) {
-		case SDLK_RIGHT: *scrollingOffsetVel -= UNICORN_START_SPEED; break;
-		case SDLK_UP: (*unicornObject).jump(true); break;
-		case SDLK_d: *gameDefaultControlsEnabled = true; break;
-		case SDLK_ESCAPE: *quit = true, *closeProgram = true; break;
-		}
-	}
-	else if ((*e).type == SDL_KEYUP && (*e).key.repeat == 0) {
-		switch ((*e).key.keysym.sym) {
-		case SDLK_RIGHT: *scrollingOffsetVel += UNICORN_START_SPEED; break;
-		case SDLK_UP: (*unicornObject).jump(false); break;
-		}
-	}
-}
-
-void gameDefaultControls(SDL_Event* e, Unicorn* unicornObject, bool* quit, bool* closeProgram, int* scrollingOffsetVel, bool* gameDefaultControlsEnabled) {
-	if ((*e).type == SDL_QUIT) {
-		*quit = true;
-		*closeProgram = true;
-	}
-	else if ((*e).type == SDL_KEYDOWN && (*e).key.repeat == 0) {
-		switch ((*e).key.keysym.sym) {
-		case SDLK_z: (*unicornObject).jump(true); break;
-		case SDLK_x: (*unicornObject).dash(true); break;
-		case SDLK_d: *gameDefaultControlsEnabled = false; *scrollingOffsetVel = 0; break;
-		case SDLK_ESCAPE: *quit = true, *closeProgram = true; break;
-		}
-	}
-	else if ((*e).type == SDL_KEYUP && (*e).key.repeat == 0) {
-		switch ((*e).key.keysym.sym) {
-		case SDLK_z: (*unicornObject).jump(false); break;
-		case SDLK_x: (*unicornObject).dash(false); break;
-		}
-	}
-}
-
-void controlGameSpeedBasedOnTime(Uint32 currentTime, bool isHorseDashing, int* scrollingOffsetVel) {
+// === Funkcja kontrolujaca predkosc gry ===
+void controlGameSpeedBasedOnTime(Uint32 currentTime, bool isHorseDashing, int* XscrollingVelocity) {
 	if (isHorseDashing) {
-		*scrollingOffsetVel = -UNICORN_DASH_SPEED;
+		*XscrollingVelocity = -UNICORN_DASH_SPEED;
 		return;
 	}
-	
-	if (*scrollingOffsetVel > -UNICORN_MAX_SPEED || *scrollingOffsetVel == -UNICORN_DASH_SPEED)
-		*scrollingOffsetVel = -((int)currentTime / 1000) / UNICORN_ACCELERATION_TEMPO - UNICORN_START_SPEED;
+
+	if (*XscrollingVelocity > -UNICORN_MAX_SPEED || *XscrollingVelocity == -UNICORN_DASH_SPEED)
+		*XscrollingVelocity = -((int)currentTime / 1000) / UNICORN_ACCELERATION_TEMPO - UNICORN_START_SPEED;
 }
 
+// === Funkcja restartujace gre ===
+void restartGame(Unicorn* unicornObject, MyPlatform platforms[PLATFORM_TYPES]) {
+	unicornObject->initUnicornValues();
+
+	for (int i = 0; i < PLATFORM_TYPES; i++)
+		platforms[i].restartPlatform();
+}
+
+// === Funkcja odpowiadajaca za wylaczenie programu ===
+void close(SDL_Window* window, SDL_Renderer* renderer) {
+	SDL_DestroyWindow(window);
+	SDL_DestroyRenderer(renderer);
+
+	window = NULL;
+	renderer = NULL;
+
+	IMG_Quit();
+	SDL_Quit();
+}
+
+// === Funkcje sprawdzajace kolizje / spadek konia z platform ===
 bool checkIfUnicornLandedOnPlatform(Unicorn* unicornObject, MyPlatform platforms[PLATFORM_TYPES]) {
 	for(int i = 0; i < PLATFORM_TYPES; i++) 
 		if (platforms[i].checkIfUnicornLandedOnPlatform(unicornObject->getCollider()))
@@ -223,17 +179,26 @@ bool checkIfUnicornFellOfPlatforms(MyPlatform platforms[PLATFORM_TYPES]) {
 	return true;
 }
 
-void close(SDL_Window* window, SDL_Renderer* renderer) {
-	SDL_DestroyWindow(window);
-	SDL_DestroyRenderer(renderer);
+void listenAndHandleExplosionOrFallingOfPlatforms(Unicorn* unicornObject, MyPlatform platforms[PLATFORM_TYPES], int* XscrollingVelocity, int* YscrollingVelocity, bool* quit) {
+	if (checkIfUnicornCrashedIntoPlatform(unicornObject, platforms))
+		unicornObject->explode();
 
-	window = NULL;
-	renderer = NULL;
+	if (checkIfUnicornFellOfPlatforms(platforms))
+		unicornObject->fellOver();
 
-	IMG_Quit();
-	SDL_Quit();
+	if (unicornObject->getDoesUnicornExploded()) {
+		*XscrollingVelocity = 0;
+		*YscrollingVelocity = 0;
+
+		if (unicornObject->hasExplosionEnded())
+			*quit = true;
+	}
+
+	if (unicornObject->hasFallingOverEnded())
+		*quit = true;
 }
 
+// Funkcje rysujace tekstury na ekranie
 void renderDigit(int digitNum, int digit, int oneDigitWidth, Texture* digitsTexture, SDL_Renderer* renderer) {
 	int marginTop = oneDigitWidth, marginLeft = oneDigitWidth * 2;
 	SDL_Rect clip = { oneDigitWidth * digit, 0, oneDigitWidth, 0 };
@@ -257,8 +222,8 @@ void renderTime(Texture* digitsTexture, Uint32 currentTime, SDL_Renderer* render
 		renderDigit(i, timeDigits[i], oneDigitWidth, digitsTexture, renderer);
 }
 
-void renderTextures(SDL_Renderer* renderer, Texture* bgTexture, Texture* digitsTexture, Unicorn* unicornObject, MyPlatform platforms[PLATFORM_TYPES], 
-	Texture wishesLeftIconsTextures[UNICORN_WISHES_NUM], Uint32 currentTime, int scrollingOffsetVel, int scrollingYOffsetVel) {
+void renderGame(SDL_Renderer* renderer, Texture* bgTexture, Texture* digitsTexture, Unicorn* unicornObject, MyPlatform platforms[PLATFORM_TYPES], 
+	Texture wishesLeftIconsTextures[UNICORN_WISHES_NUM], Uint32 currentTime, int XscrollingVelocity, int YscrollingVelocity) {
 
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
 	SDL_RenderClear(renderer);
@@ -266,54 +231,142 @@ void renderTextures(SDL_Renderer* renderer, Texture* bgTexture, Texture* digitsT
 	bgTexture->resizeAndRender(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, renderer);
 
 	for (int i = 0; i < PLATFORM_TYPES; i++)
-		platforms[i].render(renderer, scrollingOffsetVel, scrollingYOffsetVel);
+		platforms[i].render(renderer, XscrollingVelocity, YscrollingVelocity);
 
-	unicornObject->render(renderer, scrollingYOffsetVel);
+	unicornObject->render(renderer, YscrollingVelocity);
 	wishesLeftIconsTextures->render(SCREEN_WIDTH - wishesLeftIconsTextures->getWidth(), 0, renderer);
 	renderTime(digitsTexture, currentTime, renderer);
 
 	SDL_RenderPresent(renderer);
 }
 
+void renderMainMenu(Texture* startingScreenTexture, Texture* startGameSubtitle, SDL_Renderer* renderer) {
+	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+	SDL_RenderClear(renderer);
+
+	startingScreenTexture->resizeAndRender(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, renderer);
+	startGameSubtitle->render(SCREEN_WIDTH / 2 - startGameSubtitle->getWidth() / 2, SCREEN_HEIGHT - startGameSubtitle->getHeight(), renderer);
+
+	SDL_RenderPresent(renderer);
+}
+
+void renderEndScreen(Texture* endScreenTexture, Texture* againSubtitleTexture, SDL_Renderer* renderer) {
+	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+	SDL_RenderClear(renderer);
+
+	endScreenTexture->resizeAndRender(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, renderer);
+	againSubtitleTexture->render(SCREEN_WIDTH / 2 - againSubtitleTexture->getWidth() / 2, SCREEN_HEIGHT - againSubtitleTexture->getHeight(), renderer);
+
+	SDL_RenderPresent(renderer);
+}
+
+// === Funkcje odpowiadajce za obsluge wejscia od uzytkownika === 
+void handleGameEventPoll_projectDefaultControls(SDL_Event* e, Unicorn* unicornObject, bool* quit, bool* closeProgram, int* XscrollingVelocity, bool* gameDefaultControlsEnabled) {
+	while (SDL_PollEvent(e) != 0) {
+		if (e->type == SDL_QUIT) {
+			*quit = true;
+			*closeProgram = true;
+		}
+		else if (e->type == SDL_KEYDOWN && e->key.repeat == 0) {
+			switch (e->key.keysym.sym) {
+			case SDLK_RIGHT: *XscrollingVelocity -= UNICORN_START_SPEED; break;
+			case SDLK_UP: (*unicornObject).jump(true); break;
+			case SDLK_d: *gameDefaultControlsEnabled = true; break;
+			case SDLK_ESCAPE: *quit = true, * closeProgram = true; break;
+			}
+		}
+		else if (e->type == SDL_KEYUP && e->key.repeat == 0) {
+			switch (e->key.keysym.sym) {
+			case SDLK_RIGHT: *XscrollingVelocity += UNICORN_START_SPEED; break;
+			case SDLK_UP: (*unicornObject).jump(false); break;
+			}
+		}
+	}
+}
+
+void handleGameEventPoll_gameDefaultControls(SDL_Event* e, Unicorn* unicornObject, bool* quit, bool* closeProgram, int* XscrollingVelocity, bool* gameDefaultControlsEnabled) {
+	while (SDL_PollEvent(e) != 0) {
+		if (e->type == SDL_QUIT) {
+			*quit = true;
+			*closeProgram = true;
+		}
+		else if (e->type == SDL_KEYDOWN && e->key.repeat == 0) {
+			switch (e->key.keysym.sym) {
+			case SDLK_z: (*unicornObject).jump(true); break;
+			case SDLK_x: (*unicornObject).dash(true); break;
+			case SDLK_d: *gameDefaultControlsEnabled = false; *XscrollingVelocity = 0; break;
+			case SDLK_ESCAPE: *quit = true, * closeProgram = true; break;
+			}
+		}
+		else if (e->type == SDL_KEYUP && e->key.repeat == 0) {
+			switch (e->key.keysym.sym) {
+			case SDLK_z: (*unicornObject).jump(false); break;
+			case SDLK_x: (*unicornObject).dash(false); break;
+			}
+		}
+	}
+}
+
+void handleMainMenuEventPoll(SDL_Event* e, bool* quit, bool* closeProgram) {
+	while (SDL_PollEvent(e) != 0) {
+		if (e->type == SDL_QUIT) {
+			*quit = true;
+			*closeProgram = true;
+		}
+		else if (e->type == SDL_KEYDOWN && e->key.repeat == 0) {
+			switch (e->key.keysym.sym) {
+			case SDLK_z: *quit = true; break;
+			case SDLK_ESCAPE: *quit = true; *closeProgram = true; break;
+			}
+		}
+	}
+}
+
+void handleEndScreenEventPoll(SDL_Event* e, bool* quit, bool* closeProgram) {
+	while (SDL_PollEvent(e) != 0) {
+		if (e->type == SDL_QUIT) {
+			*quit = true;
+			*closeProgram = true;
+		}
+		else if (e->type == SDL_KEYDOWN && e->key.repeat == 0) {
+			switch (e->key.keysym.sym) {
+			case SDLK_z: *quit = true; break;
+			case SDLK_ESCAPE: *quit = true, *closeProgram = true; break;
+			}
+		}
+	}
+}
+
+// === Funkcje odpowiadajace za obsluge poszczegolnych etapow programu - glownego menu, rozgrywki oraz ekranu po rozbiciu jednorozca ===
+void handleMainMenu(SDL_Event* e, SDL_Renderer* renderer, Texture* startingScreenTexture, Texture* startGameSubtitle, bool* closeProgram) {
+	bool quit = false;
+
+	while (!quit) {
+		handleMainMenuEventPoll(e, &quit, closeProgram);
+		renderMainMenu(startingScreenTexture, startGameSubtitle, renderer);
+	}
+}
+
 void handleGameplay(SDL_Event* e, SDL_Renderer* renderer, bool* closeProgram, Unicorn* unicornObject, MyPlatform platforms[PLATFORM_TYPES], 
 	Texture* bgTexture, Texture* digitTexture, Texture* wishesLeftIconsTextures) {
 
-	bool quit = false, gameDefaultControlsEnabled = true;
-	int scrollingOffsetVel = 0, scrollingYOffsetVel = 0;
+	bool quit = false, gameDefaultControlsEnabled = true;	// gameDefaultControls okreslaja czy sterowanie w grze jest takie jak w oryginale
+	int XscrollingVelocity = 0, YscrollingVelocity = 0;		// predkosc przesuwania sie planszy na osi X i Y
 	Uint32 gameStartTime = SDL_GetTicks();
 
 	while (!quit) {
 		Uint32 currentTime = SDL_GetTicks() - gameStartTime;
 
-		while (SDL_PollEvent(e) != 0) {
-			if (gameDefaultControlsEnabled)
-				gameDefaultControls(e, unicornObject, &quit, closeProgram, &scrollingOffsetVel, &gameDefaultControlsEnabled);
-			else
-				projectDefaultControls(e, unicornObject, &quit, closeProgram, &scrollingOffsetVel, &gameDefaultControlsEnabled);
+		if (gameDefaultControlsEnabled) {
+			controlGameSpeedBasedOnTime(currentTime, unicornObject->getIsUnicornDashing(), &XscrollingVelocity);
+			handleGameEventPoll_gameDefaultControls(e, unicornObject, &quit, closeProgram, &XscrollingVelocity, &gameDefaultControlsEnabled);
 		}
+		else
+			handleGameEventPoll_projectDefaultControls(e, unicornObject, &quit, closeProgram, &XscrollingVelocity, &gameDefaultControlsEnabled);
 
-		if (gameDefaultControlsEnabled)
-			controlGameSpeedBasedOnTime(currentTime, unicornObject->getIsUnicornDashing(), &scrollingOffsetVel);
-
-		if (checkIfUnicornCrashedIntoPlatform(unicornObject, platforms))
-			unicornObject->explode();
-
-		if (checkIfUnicornFellOfPlatforms(platforms))
-			unicornObject->fellOver();
-
-		if (unicornObject->getDoesUnicornExploded()) {
-			scrollingOffsetVel = 0;
-			scrollingYOffsetVel = 0;
-
-			if (unicornObject->hasExplosionEnded())
-				quit = true;
-		}
-
-		if (unicornObject->hasFallingOverEnded()) 
-			quit = true;
-
-		unicornObject->manipulateUnicornOnYAxis(checkIfUnicornLandedOnPlatform(unicornObject, platforms), &scrollingYOffsetVel);
-		renderTextures(renderer, bgTexture, digitTexture, unicornObject, platforms, wishesLeftIconsTextures, currentTime, scrollingOffsetVel, scrollingYOffsetVel);
+		listenAndHandleExplosionOrFallingOfPlatforms(unicornObject, platforms, &XscrollingVelocity, &YscrollingVelocity, &quit);
+		unicornObject->manipulateYScrollingVelocity(checkIfUnicornLandedOnPlatform(unicornObject, platforms), &YscrollingVelocity);
+		renderGame(renderer, bgTexture, digitTexture, unicornObject, platforms, wishesLeftIconsTextures, currentTime, XscrollingVelocity, YscrollingVelocity);
 	}
 }
 
@@ -321,37 +374,13 @@ void handleEndScreen(SDL_Event* e, SDL_Renderer* renderer, bool* closeProgram, T
 	bool quit = false;
 
 	while (!quit) {
-
-		while (SDL_PollEvent(e) != 0) {
-			if ((*e).type == SDL_QUIT) {
-				quit = true;
-				*closeProgram = true;
-			}
-			else if ((*e).type == SDL_KEYDOWN && (*e).key.repeat == 0) {
-				switch ((*e).key.keysym.sym) {
-				case SDLK_z: quit = true; break;
-				case SDLK_ESCAPE: quit = true, *closeProgram = true; break;
-				}
-			}
-		}
-
-		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
-		SDL_RenderClear(renderer);
-		endScreenTexture->resizeAndRender(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, renderer);
-		againSubtitleTexture->render(SCREEN_WIDTH / 2 - againSubtitleTexture->getWidth() / 2, SCREEN_HEIGHT - againSubtitleTexture->getHeight(), renderer);
-		SDL_RenderPresent(renderer);
+		handleEndScreenEventPoll(e, &quit, closeProgram);
+		renderEndScreen(endScreenTexture, againSubtitleTexture, renderer);
 	}
 
 }
 
-void restartGame(Unicorn* unicornObject, MyPlatform platforms[PLATFORM_TYPES]) {
-	unicornObject->initUnicornValues();
-
-	for (int i = 0; i < PLATFORM_TYPES; i++)
-		platforms[i].restartPlatform();
-}
-
-
+// === main ====
 int main()
 {
 	SDL_Window* window = NULL;
@@ -388,19 +417,16 @@ int main()
 			int wishes = UNICORN_WISHES_NUM;
 
 			handleMainMenu(&e, renderer, &startingScreenTexture, &subtitlesTextures[START_SUBTITLE_INDEX], &closeProgram);
-
 			if (closeProgram)
 				break;
 				
 			while (wishes > 0) {
 				handleGameplay(&e, renderer, &closeProgram, &unicornObject, platforms, &bgTexture, &digitsTexture, &wishesLeftIconsTextures[wishes - 1]);
-
 				if (closeProgram)
 					break;
 
 				restartGame(&unicornObject, platforms);
 				handleEndScreen(&e, renderer, &closeProgram, &endScreenTexture, &subtitlesTextures[AGAIN_SUBTITLE_INDEX]);
-
 				if (closeProgram)
 					break;
 
@@ -410,7 +436,6 @@ int main()
 			if (closeProgram)
 				break;
 		}
-
 	}
 		
 	close(window, renderer);

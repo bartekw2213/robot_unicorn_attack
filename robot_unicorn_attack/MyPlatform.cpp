@@ -71,9 +71,9 @@ bool MyPlatform::loadTexture(SDL_Renderer* renderer) {
 	return true;
 }
 
-void MyPlatform::render(SDL_Renderer* renderer, int scrollingOffsetVel, int scrollingYOffsetVel) {
-	mPosX += scrollingOffsetVel;
-	mPosY += scrollingYOffsetVel;
+void MyPlatform::render(SDL_Renderer* renderer, int XscrollingVelocity, int YscrollingVelocity) {
+	mPosX += XscrollingVelocity;
+	mPosY += YscrollingVelocity;
 
 	mMyPlatformTexture.resizeAndRender(mPosX, mPosY, mPlatformWidth, mPlatformHeight, renderer);
 	shiftColliders();

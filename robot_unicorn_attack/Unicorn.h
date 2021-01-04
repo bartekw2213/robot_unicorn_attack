@@ -9,10 +9,10 @@ public:
 	Unicorn();
 	~Unicorn();
 
-	void render(SDL_Renderer* renderer, int scrollingYOffsetVel);
+	void render(SDL_Renderer* renderer, int YscrollingVelocity);
 	void shiftCollider();
 	bool loadTextures(SDL_Renderer* renderer);
-	void manipulateUnicornOnYAxis(bool unicornLandedOnPlatform, int* scrollingYOffset);
+	void manipulateYScrollingVelocity(bool unicornLandedOnPlatform, int* scrollingYOffset);
 	void jump(bool isPlayerHoldingJumpKey);
 	void dash(bool isPlayerHoldingDash);
 	void explode();

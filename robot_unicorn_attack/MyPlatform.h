@@ -11,7 +11,7 @@ public:
 	bool loadTexture(SDL_Renderer* renderer);
 	bool checkIfUnicornLandedOnPlatform(SDL_Rect* unicornCollider);
 	bool checkIfUnicornCrashedIntoPlatform(SDL_Rect* unicornCollider);
-	void render(SDL_Renderer* renderer, int scrollingOffsetVel, int scrollingYOffsetVel);
+	void render(SDL_Renderer* renderer, int XscrollingVelocity, int YscrollingVelocity);
 	void restartPlatform();
 	SDL_Rect* getCollider(int colliderNum);
 	int getPosY();
