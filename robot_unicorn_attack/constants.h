@@ -64,7 +64,7 @@
 #define PLATFORM2_HEIGHT 287							// wysokosc platformy typu 2
 #define MIN_PLATFORM2_Y SCREEN_HEIGHT - 350				// minimalna wysokosc na jakiej moze pojawic sie platforma typu 2
 #define MAX_PLATFORM2_Y SCREEN_HEIGHT - 250				// maksymalna wysokosc na jakiej moze pojawic sie platforma typu 2
-#define PLATFORM2_COLLIDERS_NUM 2						// ilosc prostokatow wykrywajacych kolizje z platforma typu 2
+#define PLATFORM2_COLLIDERS_NUM 3						// ilosc prostokatow wykrywajacych kolizje z platforma typu 2
 
 // Platform 3
 #define PLATFORM3_WIDTH 900								// szerokosc platformy typu 3

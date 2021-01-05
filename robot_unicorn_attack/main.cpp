@@ -232,7 +232,7 @@ void renderGame(SDL_Renderer* renderer, Texture* bgTexture, Texture* digitsTextu
 
 	for (int i = 0; i < PLATFORM_TYPES; i++)
 		platforms[i].render(renderer, XscrollingVelocity, YscrollingVelocity);
-
+	
 	unicornObject->render(renderer, YscrollingVelocity);
 	wishesLeftIconsTextures->render(SCREEN_WIDTH - wishesLeftIconsTextures->getWidth(), 0, renderer);
 	renderTime(digitsTexture, currentTime, renderer);

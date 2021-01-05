@@ -124,6 +124,8 @@ void MyPlatform::shiftColliders() {
 			mPlatformColliders[0].x = mPosX;
 			mPlatformColliders[1].y = mPosY;
 			mPlatformColliders[1].x = mPosX + mPlatformWidth / 1.7;
+			mPlatformColliders[2].y = mPosY;
+			mPlatformColliders[2].x = mPosX + mPlatformWidth / 1.3;
 			break;
 		case 3: 
 			mPlatformColliders[0].y = mPosY;
@@ -155,6 +157,8 @@ void MyPlatform::createPlatformColliders(SDL_Rect platformColliders[MAX_COLLIDER
 			platformColliders[0].h = mPlatformHeight / 4;
 			platformColliders[1].w = mPlatformWidth / 2.5;
 			platformColliders[1].h = mPlatformHeight / 4;
+			platformColliders[2].w = mPlatformWidth / 6;
+			platformColliders[2].h = mPlatformHeight;
 			break;
 		case 3:
 			platformColliders[0].w = mPlatformWidth;
