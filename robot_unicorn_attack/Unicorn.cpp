@@ -60,7 +60,7 @@ bool Unicorn::loadTextures(SDL_Renderer* renderer) {
 	if (!mLoadUnicornAnimationFrames(UNICORN_JUMPING_TEXTURES_NUM, "../images/unicorn_jump/", mUnicornJumpingTextures, renderer))
 		return false;
 
-	if (!mLoadUnicornAnimationFrames(UNICORN_EXPLOSION_TEXTURES_NUM, "../images/unicorn_explosion/", mUnicornExplosionTextures, renderer))
+	if (!mLoadUnicornAnimationFrames(UNICORN_EXPLOSION_TEXTURES_NUM, "../images/explosion/", mUnicornExplosionTextures, renderer))
 		return false;
 
 	return true;

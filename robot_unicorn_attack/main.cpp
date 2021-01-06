@@ -165,7 +165,7 @@ bool checkIfUnicornLandedOnPlatform(Unicorn* unicornObject, MyPlatform platforms
 
 bool checkIfUnicornCrashedIntoPlatform(Unicorn* unicornObject, MyPlatform platforms[PLATFORM_TYPES]) {
 	for (int i = 0; i < PLATFORM_TYPES; i++)
-		if (platforms[i].checkIfUnicornCrashedIntoPlatform(unicornObject->getCollider()))
+		if (platforms[i].checkIfUnicornCrashedIntoPlatformOrStar(unicornObject->getCollider(), unicornObject->getIsUnicornDashing()))
 			return true;
 
 	return false;

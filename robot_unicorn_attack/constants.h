@@ -4,8 +4,8 @@
 #define UNICORN_TEXTURES_NUM 450						// ilosc tekstur skladajacych sie na animacje biegnacego jednorozca
 #define UNICORN_DASHING_TEXTURES_NUM 16					// ilosc tekstur skladajacych sie na anmiacje dashujacego jednorozca
 #define UNICORN_FALLING_TEXTURES_NUM 16					// ilosc tekstur skladajacych sie na animacje spadajacego jednorozca
-#define UNICORN_EXPLOSION_TEXTURES_NUM 15				// ilosc tekstur skladajacych sie na animacje wybuchajacego jednorozca
 #define UNICORN_JUMPING_TEXTURES_NUM 4					// ilosc tekstur skladajacych sie na animacje skaczacego jednorozca
+#define UNICORN_EXPLOSION_TEXTURES_NUM 15						// ilosc tekstur skladajacych sie na animacje wybuchu
 
 #define UNICORN_WIDTH 200								// szerokosc tekstury jednorozca
 #define UNICORN_HEIGHT 106								// wysokosc tekstury jednorozca
@@ -26,8 +26,8 @@
 #define UNICORN_TEXTURES_DASH_TO_RUN_SIZE_RATIO 1.5		// ile razy wieksza powinna byc tekstura dashujacego jednorozca od tego biegnacego
 
 // === Sta³e dotycz¹ce rozgrywki ===
-#define SCREEN_WIDTH 940								// szerokosc ekranu gry
-#define SCREEN_HEIGHT 580								// wysokosc ekranu gry
+#define SCREEN_WIDTH 1140								// szerokosc ekranu gry
+#define SCREEN_HEIGHT 780								// wysokosc ekranu gry
 
 #define UNICORN_WISHES_NUM 3							// ilosc "zyc"
 #define GRAVITATION_FACTOR 25							// wspolczynnik grawitacji - im bedzie mniejszy tym grawitacja bedzie silniejsza
@@ -47,7 +47,7 @@
 
 // === Sta³e dotycz¹ce platform ===
 #define PLATFORM_TYPES 4								// ilosc typow platfrom jakie moga wystapic w rozgrywce
-#define DISTANCE_BETWEEN_PLATFORMS 500					// dystans pomiedzy platformami
+#define DISTANCE_BETWEEN_PLATFORMS 550					// dystans pomiedzy platformami
 #define PLATFORMS_Y_WHEN_FELL_OVER_IS_DETECTED -1000	// gdy jednorozec jest w odleglosci 1000 na osi Y od najblizszej platformy - gra jest konczona
 #define PLATFORMS_Y_COLLISION_OFFSET 30					// granica na osi Y na jakiej ci¹gle wykrywana jest ewentualna kolizja jednoro¿ca z obiektem
 #define MAX_COLLIDERS 3									// maksymalna ilosc prostokatow wykrywajacych kolizje
@@ -79,3 +79,8 @@
 #define MIN_PLATFORM4_Y SCREEN_HEIGHT + 100;			// minimalna wysokosc na jakiej moze pojawic sie platforma typu 4
 #define MAX_PLATFORM4_Y SCREEN_HEIGHT + 300				// maksymalna wysokosc na jakiej moze pojawic sie platforma typu 4
 #define PLATFORM4_COLLIDERS_NUM 2						// ilosc prostokatow wykrywajacych kolizje z platforma typu 4
+
+// === Gwiazda ===
+#define CHANCE_TO_RENDER_STAR 30						// szansa na wyrenderowanie gwiazdy na nowo powsta³ej przeszkodzie (w procentach)
+#define STAR_EXPLOSION_TEXTURE_NUM 7					// ilosc tekstur skladajacych sie na animacje wybuchu gwiazdy
+#define STAR_EXPLOSION_TIME 100							// czas wybuchu gwiazdy

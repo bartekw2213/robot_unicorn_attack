@@ -12,6 +12,7 @@ MyPlatform::MyPlatform() {
 	mPlatfromCollidersNum = 0;
 	mPosX = 0;
 	mPosY = 0;
+	mRenderStar = false;
 }
 
 MyPlatform::~MyPlatform() {
@@ -66,14 +67,35 @@ bool MyPlatform::loadTexture(SDL_Renderer* renderer) {
 		return false;
 	};
 
+	if (!mStarRenderedOnPlatform.loadTexture(renderer)) {
+		printf("Failed to load star texture image!\n");
+		return false;
+	};
+
+
 	createPlatformColliders(mPlatformColliders);
 
 	return true;
 }
 
+void MyPlatform::createStarIfNeeded(SDL_Renderer* renderer) {
+	if (rand() % 100 > CHANCE_TO_RENDER_STAR) {
+		mRenderStar = false;
+		printf("Nie renderuje\n");
+	}
+	else {
+		printf("Renderuje\n");
+		mRenderStar = true;
+		mStarRenderedOnPlatform.initStarPosition(mPlatformColliders, mPlatfromCollidersNum);
+	}
+}
+
 void MyPlatform::render(SDL_Renderer* renderer, int XscrollingVelocity, int YscrollingVelocity) {
 	mPosX += XscrollingVelocity;
 	mPosY += YscrollingVelocity;
+
+	if (mRenderStar)
+		mStarRenderedOnPlatform.render(renderer, mPlatformColliders);
 
 	mMyPlatformTexture.resizeAndRender(mPosX, mPosY, mPlatformWidth, mPlatformHeight, renderer);
 	shiftColliders();
@@ -81,8 +103,8 @@ void MyPlatform::render(SDL_Renderer* renderer, int XscrollingVelocity, int Yscr
 	if (mPosX < -mPlatformWidth) {
 		mPosX = generatePlatformX();
 		mPosY = generatePlatformY();
+		createStarIfNeeded(renderer);
 	}
-
 }
 
 int MyPlatform::generatePlatformY() {
@@ -194,11 +216,21 @@ bool MyPlatform::checkIfUnicornLandedOnCollider(SDL_Rect* platformCollider, SDL_
 	return true;
 }
 
-bool MyPlatform::checkIfUnicornCrashedIntoCollider(SDL_Rect* platformCollider, SDL_Rect* unicornCollider) {
+bool MyPlatform::checkIfUnicornCrashedIntoColliderOrStar(SDL_Rect* platformCollider, SDL_Rect* unicornCollider, bool isUnicornDashing) {
 	int unicornTopY = unicornCollider->y;
 	int unicornBottomY = unicornCollider->y + unicornCollider->h;
 	int unicornRightX = unicornCollider->x + unicornCollider->w;
 	int unicornLeftX = unicornCollider->x;
+
+	if (mStarRenderedOnPlatform.checkIfUnicornCrashedIntoStar(unicornCollider)) {
+		if (isUnicornDashing) {
+			mStarRenderedOnPlatform.explode();
+		}
+		else {
+			mStarRenderedOnPlatform.restartStar();
+			return true;
+		}
+	}
 
 	if (checkIfUnicornLandedOnCollider(platformCollider, unicornCollider))
 		return false;
@@ -223,9 +255,9 @@ bool MyPlatform::checkIfUnicornLandedOnPlatform(SDL_Rect* unicornCollider) {
 	return false;
 };
 
-bool MyPlatform::checkIfUnicornCrashedIntoPlatform(SDL_Rect* unicornCollider) {
+bool MyPlatform::checkIfUnicornCrashedIntoPlatformOrStar(SDL_Rect* unicornCollider, bool isUnicornDashing) {
 	for (int i = 0; i < mPlatfromCollidersNum; i++)
-		if (checkIfUnicornCrashedIntoCollider(&mPlatformColliders[i], unicornCollider))
+		if (checkIfUnicornCrashedIntoColliderOrStar(&mPlatformColliders[i], unicornCollider, isUnicornDashing))
 			return true;
 
 	return false;
@@ -248,6 +280,7 @@ void MyPlatform::restartPlatform() {
 	}
 
 	mPosY = generatePlatformY();
+	mRenderStar = false;
 	shiftColliders();
 }
 
